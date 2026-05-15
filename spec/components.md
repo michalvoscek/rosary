@@ -98,7 +98,7 @@ See [`spec/prayer-steps.md`](prayer-steps.md) for the canonical 78-step definiti
 <div space-y-2>
   ├─ Row (flex justify-between, text-xs)
   │   ├─ Stage label (font-medium text-stone-700)
-  │   │   e.g. "Úvod / Start", "Decade 1", "Zdravas Kráľovná / Hail Holy Queen"
+  │   │   e.g. "Úvod / Start", "Desiatok 1 / Decade 1", "Zdravas Kráľovná / Hail Holy Queen"
   │   └─ Stage percentage (text-stone-500)
   │
   └─ Bar (h-2, bg-stone-200, rounded-full, overflow-hidden)
