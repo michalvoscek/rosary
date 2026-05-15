@@ -1,0 +1,166 @@
+# Components Specification
+
+## Layout (`Layout.tsx`)
+**File**: `src/components/Layout.tsx`
+
+### Props
+| Prop | Type | Description |
+|------|------|-------------|
+| `children` | `ReactNode` | Page content |
+
+### Structure
+```
+<div min-h-screen flex flex-col bg-stone-50>
+  ├─ <header> (sticky top-0, z-50)
+  │   └─ <div> max-w-2xl, h-14, flex justify-between
+  │       ├─ Logo (BookOpen + "Rosary")
+  │       ├─ Desktop nav (hidden on mobile)
+  │       │   └─ Links: Home, About (active state styling)
+  │       └─ Language toggle (Globe + "SK" | "EN")
+  │
+  ├─ <nav> (mobile bottom nav, sm:hidden)
+  │   └─ Links: Home, About (icon + label)
+  │
+  ├─ <main> (flex-1, max-w-2xl, mx-auto, px-4, py-6 sm:py-8)
+  │   └─ {children}
+  │
+  └─ <div> (mobile spacer, sm:hidden, h-14)
+```
+
+### Active State
+Uses `useLocation()` to determine active route:
+- Home (`/`): exact match
+- About (`/about`): starts with `/about`
+- Active: `bg-rosary-purple/10 text-rosary-purple`
+- Inactive: `text-stone-500 hover:text-stone-800 hover:bg-stone-100`
+
+### Language Toggle
+- Button with `<Globe size={16} />` + uppercase language code
+- Calls `toggleLang()` from `useLanguage()`
+- Changes immediately; all text re-renders via Context
+
+---
+
+## MysteryCard (`MysteryCard.tsx`)
+**File**: `src/components/MysteryCard.tsx`
+
+### Props
+| Prop | Type | Description |
+|------|------|-------------|
+| `mysterySet` | `MysterySetData` | The mystery set to display |
+| `isRecommended` | `boolean` | Show "Dnes / Today" badge |
+
+### Structure
+```
+<a> (block, rounded-2xl, border, bg-white, hover:shadow-md, active:scale-[0.98])
+  ├─ Header Row (flex justify-between)
+  │   ├─ Title + Subtitle
+  │   └─ [if isRecommended] Badge (rounded-full, white text, mystery color bg)
+  │
+  ├─ Decade info (color dot + "5 desiatok / 5 decades")
+  │
+  └─ CTA ("Začať modlitbu / Start praying" + ArrowRight)
+```
+
+### Interactions
+- Click → `href={`/pray/${mysterySet.id}`}` (browser navigation, SPA handled by Router)
+- Hover: shadow, border darkens
+- Active press: scale down slightly
+
+---
+
+## PrayerDisplay (`PrayerDisplay.tsx`)
+**File**: `src/components/PrayerDisplay.tsx`
+
+### Props
+| Prop | Type | Description |
+|------|------|-------------|
+| `step` | `number` | Current prayer step (0–77) |
+| `mysterySetId` | `string` | Mystery set ID |
+| `decadeIndex` | `number` | Current decade (0–4) |
+| `mystery` | `Mystery` | Current mystery object |
+
+### Structure
+```
+<div space-y-6>
+  ├─ Label pill (centered, text-xs, bg-stone-100)
+  │
+  ├─ [if mystery announcement step]
+  │   └─ Mystery Highlight Box (bg-rosary-purple/5, border, centered)
+  │       ├─ "Tajomstvo / Mystery" label
+  │       ├─ Mystery name (text-2xl bold)
+  │       └─ Mystery description
+  │
+  └─ Prayer Text Card (bg-white, border, rounded-2xl, p-6 sm:p-8)
+      └─ Text (text-lg sm:text-xl, centered, leading-relaxed)
+```
+
+### Step Mapping Logic
+The component contains a `getPrayer(s: number)` function that returns `{ label, text }` based on the step number. It uses the current language from `useLanguage()` to select the correct text.
+
+Key step ranges:
+- 0: Sign of the Cross
+- 1: Apostles' Creed
+- 2: Our Father
+- 3–5: Hail Mary (3×)
+- 6: Glory Be
+- 7–20: Decade 1 (mystery + Our Father + 10 Hail Marys + Glory Be + Fatima)
+- 21–34: Decade 2
+- 35–48: Decade 3
+- 49–62: Decade 4
+- 63–76: Decade 5
+- 77: Hail Holy Queen
+
+### Hail Mary Counting
+Hail Mary steps within a decade show the count: "Zdravas Mária (1/10)"
+
+---
+
+## ProgressIndicator (`ProgressIndicator.tsx`)
+**File**: `src/components/ProgressIndicator.tsx`
+
+### Props
+| Prop | Type | Description |
+|------|------|-------------|
+| `currentStep` | `number` | Current step (0-based) |
+| `totalSteps` | `number` | Total steps (78) |
+
+### Structure
+```
+<div space-y-2>
+  ├─ Row (flex justify-between, text-xs text-stone-500)
+  │   ├─ "Pokrok / Progress"
+  │   └─ "{percentage}%"
+  │
+  └─ Bar (h-2, bg-stone-200, rounded-full, overflow-hidden)
+      └─ Fill (h-full, bg-rosary-purple, rounded-full, animated)
+```
+
+### Animation
+Fill width uses `transition-all duration-500 ease-out` for smooth progress updates.
+
+---
+
+## LanguageContext (`LanguageContext.tsx`)
+**File**: `src/contexts/LanguageContext.tsx`
+
+### API
+| Export | Type | Description |
+|--------|------|-------------|
+| `LanguageProvider` | `React.FC<{ children }>` | Wraps app; reads `localStorage` on init |
+| `useLanguage` | `() => LanguageContextValue` | Hook for consuming context |
+
+### Context Value
+```ts
+interface LanguageContextValue {
+  lang: Language;           // 'sk' | 'en'
+  setLang: (lang: Language) => void;  // Set and save to localStorage
+  toggleLang: () => void;   // Toggle between sk/en
+  t: (bilingual: BilingualText) => string;  // Helper: returns text in current lang
+}
+```
+
+### Persistence
+- Reads `rosary-lang` from `localStorage` on mount
+- Saves to `rosary-lang` on every change
+- Defaults to `sk` if no value stored
