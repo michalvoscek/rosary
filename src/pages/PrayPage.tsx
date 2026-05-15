@@ -1,37 +1,49 @@
-import { useParams, useNavigate } from 'react-router-dom';
-import { useLanguage } from '../contexts/LanguageContext';
-import { getMysterySet } from '../data/mysteries';
-import { PrayerDisplay } from '../components/PrayerDisplay';
-import { ProgressIndicator } from '../components/ProgressIndicator';
-import { ArrowLeft, ArrowRight, RotateCcw, Home } from 'lucide-react';
+import { useParams, useNavigate } from "react-router-dom";
+import { useLanguage } from "../contexts/LanguageContext";
+import { getMysterySet } from "../data/mysteries";
+import { PrayerDisplay } from "../components/PrayerDisplay";
+import { ProgressIndicator } from "../components/ProgressIndicator";
+import { ArrowLeft, ArrowRight, RotateCcw, Home } from "lucide-react";
 
 const TOTAL_STEPS = 7 + 13 * 5 + 1; // opening 7 + 5 decades * 13 + closing 1 = 73
 
 export function PrayPage() {
-  const { mysterySetId, step } = useParams<{ mysterySetId: string; step?: string }>();
+  const { mysterySetId, step } = useParams<{
+    mysterySetId: string;
+    step?: string;
+  }>();
   const navigate = useNavigate();
   const { t } = useLanguage();
 
-  const mysterySet = getMysterySet(mysterySetId || '');
-  const currentStep = Math.max(0, Math.min(TOTAL_STEPS - 1, parseInt(step || '0', 10) || 0));
+  const mysterySet = getMysterySet(mysterySetId || "");
+  const currentStep = Math.max(
+    0,
+    Math.min(TOTAL_STEPS - 1, parseInt(step || "0", 10) || 0),
+  );
 
   if (!mysterySet) {
     return (
       <div className="text-center py-20">
-        <p className="text-stone-500">{t({ sk: 'Tajomstvo nenájdené', en: 'Mystery not found' })}</p>
+        <p className="text-stone-500">
+          {t({ sk: "Tajomstvo nenájdené", en: "Mystery not found" })}
+        </p>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate("/")}
           className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rosary-purple text-white text-sm font-medium hover:bg-rosary-purple/90 transition-colors"
         >
           <Home size={16} />
-          {t({ sk: 'Späť domov', en: 'Back home' })}
+          {t({ sk: "Späť domov", en: "Back home" })}
         </button>
       </div>
     );
   }
 
-  const currentDecade = Math.max(0, Math.min(4, Math.floor((currentStep - 7) / 13)));
-  const currentMystery = mysterySet.decades[currentDecade] || mysterySet.decades[0];
+  const currentDecade = Math.max(
+    0,
+    Math.min(4, Math.floor((currentStep - 7) / 13)),
+  );
+  const currentMystery =
+    mysterySet.decades[currentDecade] || mysterySet.decades[0];
 
   const goToStep = (s: number) => {
     navigate(`/pray/${mysterySetId}/${s}`);
@@ -45,22 +57,6 @@ export function PrayPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <button
-          onClick={() => navigate('/')}
-          className="flex items-center gap-1.5 text-sm text-stone-500 hover:text-stone-800 transition-colors"
-        >
-          <ArrowLeft size={16} />
-          <span className="hidden sm:inline">{t({ sk: 'Naspäť', en: 'Back' })}</span>
-        </button>
-        <div className="text-center">
-          <h1 className="text-lg font-semibold text-stone-900">{t(mysterySet.title)}</h1>
-          <p className="text-xs text-stone-500">
-            {t({ sk: 'Desiatok', en: 'Decade' })} {Math.min(currentDecade + 1, 5)} / 5
-          </p>
-        </div>
-        <div className="w-16" />
-      </div>
 
       <ProgressIndicator currentStep={currentStep} />
 
@@ -70,12 +66,12 @@ export function PrayPage() {
             <RotateCcw size={32} />
           </div>
           <h2 className="text-2xl font-bold text-stone-900">
-            {t({ sk: 'Ruženec dokončený', en: 'Rosary completed' })}
+            {t({ sk: "Ruženec dokončený", en: "Rosary completed" })}
           </h2>
           <p className="text-stone-600 max-w-sm mx-auto">
             {t({
-              sk: 'Ďakujeme za spoločnú modlitbu. Nech vás Panna Mária ochraňuje.',
-              en: 'Thank you for praying with us. May the Virgin Mary protect you.',
+              sk: "Ďakujeme za spoločnú modlitbu. Nech vás Panna Mária ochraňuje.",
+              en: "Thank you for praying with us. May the Virgin Mary protect you.",
             })}
           </p>
           <div className="flex items-center justify-center gap-3">
@@ -84,14 +80,14 @@ export function PrayPage() {
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-rosary-purple text-white text-sm font-medium hover:bg-rosary-purple/90 transition-colors"
             >
               <RotateCcw size={16} />
-              {t({ sk: 'Zopakovať', en: 'Repeat' })}
+              {t({ sk: "Zopakovať", en: "Repeat" })}
             </button>
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate("/")}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-stone-100 text-stone-700 text-sm font-medium hover:bg-stone-200 transition-colors"
             >
               <Home size={16} />
-              {t({ sk: 'Domov', en: 'Home' })}
+              {t({ sk: "Domov", en: "Home" })}
             </button>
           </div>
         </div>
@@ -112,12 +108,12 @@ export function PrayPage() {
             disabled={!canGoBack}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
               canGoBack
-                ? 'bg-stone-100 text-stone-700 hover:bg-stone-200'
-                : 'bg-stone-50 text-stone-300 cursor-not-allowed'
+                ? "bg-stone-100 text-stone-700 hover:bg-stone-200"
+                : "bg-stone-50 text-stone-300 cursor-not-allowed"
             }`}
           >
             <ArrowLeft size={16} />
-            {t({ sk: 'Predchádzajúca', en: 'Previous' })}
+            {t({ sk: "Predchádzajúca", en: "Previous" })}
           </button>
 
           <span className="text-xs text-stone-400 font-medium tabular-nums">
@@ -129,11 +125,11 @@ export function PrayPage() {
             disabled={!canGoForward}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-colors ${
               canGoForward
-                ? 'bg-rosary-purple text-white hover:bg-rosary-purple/90'
-                : 'bg-stone-100 text-stone-300 cursor-not-allowed'
+                ? "bg-rosary-purple text-white hover:bg-rosary-purple/90"
+                : "bg-stone-100 text-stone-300 cursor-not-allowed"
             }`}
           >
-            {t({ sk: 'Ďalej', en: 'Next' })}
+            {t({ sk: "Ďalej", en: "Next" })}
             <ArrowRight size={16} />
           </button>
         </div>
