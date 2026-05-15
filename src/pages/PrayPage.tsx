@@ -1,11 +1,18 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { getMysterySet } from "../data/mysteries";
 import { PrayerDisplay } from "../components/PrayerDisplay";
 import { ProgressIndicator } from "../components/ProgressIndicator";
-import { ArrowLeft, ArrowRight, RotateCcw, Home } from "lucide-react";
+import {
+  RotateCcw,
+  Home,
+  ArrowLeft,
+  ChevronUp,
+  ChevronDown,
+} from "lucide-react";
 
-const TOTAL_STEPS = 7 + 13 * 5 + 1; // opening 7 + 5 decades * 13 + closing 1 = 73
+const TOTAL_STEPS = 7 + 13 * 5 + 1; // 73
 
 export function PrayPage() {
   const { mysterySetId, step } = useParams<{
@@ -13,6 +20,7 @@ export function PrayPage() {
     step?: string;
   }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useLanguage();
 
   const mysterySet = getMysterySet(mysterySetId || "");
@@ -20,6 +28,118 @@ export function PrayPage() {
     0,
     Math.min(TOTAL_STEPS - 1, parseInt(step || "0", 10) || 0),
   );
+
+  // Animation state
+  const entryDirection = (
+    location.state as { direction?: "up" | "down" } | null
+  )?.direction;
+  const [exitDirection, setExitDirection] = useState<"up" | "down" | null>(
+    null,
+  );
+  const [showHint, setShowHint] = useState(true);
+
+  // Swipe detection refs
+  const touchStartY = useRef<number | null>(null);
+  const isAnimatingRef = useRef(false);
+
+  // Track if hint has been dismissed
+  const hintDismissedRef = useRef(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!hintDismissedRef.current) {
+        setShowHint(false);
+      }
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Entry animation: remove class after animation completes
+  useEffect(() => {
+    if (entryDirection) {
+      const timer = setTimeout(() => {
+        navigate(location.pathname, { replace: true, state: {} });
+      }, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [entryDirection, location.pathname, navigate]);
+
+  const goToStep = useCallback(
+    (s: number, direction: "up" | "down") => {
+      if (isAnimatingRef.current) return;
+      isAnimatingRef.current = true;
+      setExitDirection(direction);
+
+      // Dismiss hint on first interaction
+      if (!hintDismissedRef.current) {
+        hintDismissedRef.current = true;
+        setShowHint(false);
+      }
+
+      setTimeout(() => {
+        navigate(`/pray/${mysterySetId}/${s}`, { state: { direction } });
+        isAnimatingRef.current = false;
+        setExitDirection(null);
+      }, 250);
+    },
+    [mysterySetId, navigate],
+  );
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      if (touchStartY.current === null) return;
+      const deltaY = touchStartY.current - e.changedTouches[0].clientY;
+      touchStartY.current = null;
+
+      const SWIPE_THRESHOLD = 50;
+
+      if (deltaY > SWIPE_THRESHOLD && currentStep < TOTAL_STEPS - 1) {
+        goToStep(currentStep + 1, "up");
+      } else if (deltaY < -SWIPE_THRESHOLD && currentStep > 0) {
+        goToStep(currentStep - 1, "down");
+      }
+    },
+    [currentStep, goToStep],
+  );
+
+  // Also handle wheel/trackpad scroll
+  const handleWheel = useCallback(
+    (e: React.WheelEvent) => {
+      const delta = e.deltaY;
+      const SCROLL_THRESHOLD = 40;
+
+      if (delta > SCROLL_THRESHOLD && currentStep < TOTAL_STEPS - 1) {
+        goToStep(currentStep + 1, "up");
+      } else if (delta < -SCROLL_THRESHOLD && currentStep > 0) {
+        goToStep(currentStep - 1, "down");
+      }
+    },
+    [currentStep, goToStep],
+  );
+
+  const canGoBack = currentStep > 0;
+  const canGoForward = currentStep < TOTAL_STEPS - 1;
+  const isFinished = currentStep === TOTAL_STEPS - 1;
+
+  // Entry animation class
+  const entryClass =
+    entryDirection === "up"
+      ? "animate-slide-up-in"
+      : entryDirection === "down"
+        ? "animate-slide-down-in"
+        : "animate-fade-in";
+
+  // Exit animation class
+  const exitClass =
+    exitDirection === "up"
+      ? "animate-slide-up-out"
+      : exitDirection === "down"
+        ? "animate-slide-down-out"
+        : "";
 
   if (!mysterySet) {
     return (
@@ -45,91 +165,79 @@ export function PrayPage() {
   const currentMystery =
     mysterySet.decades[currentDecade] || mysterySet.decades[0];
 
-  const goToStep = (s: number) => {
-    navigate(`/pray/${mysterySetId}/${s}`);
-  };
-
-  const canGoBack = currentStep > 0;
-  const canGoForward = currentStep < TOTAL_STEPS - 1;
-
-  const isFinished = currentStep === TOTAL_STEPS - 1;
-
   return (
     <div className="space-y-6">
       {/* Header */}
 
       <ProgressIndicator currentStep={currentStep} />
 
-      {isFinished ? (
-        <div className="text-center py-12 space-y-6">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-rosary-purple/10 text-rosary-purple">
-            <RotateCcw size={32} />
+      {/* Swipeable prayer area */}
+      <div
+        className={`relative min-h-[50vh] select-none no-scrollbar ${exitClass} ${entryClass}`}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onWheel={handleWheel}
+      >
+        {isFinished ? (
+          <div className="text-center py-12 space-y-6">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-rosary-purple/10 text-rosary-purple">
+              <RotateCcw size={32} />
+            </div>
+            <h2 className="text-2xl font-bold text-stone-900">
+              {t({ sk: "Ruženec dokončený", en: "Rosary completed" })}
+            </h2>
+            <p className="text-stone-600 max-w-sm mx-auto">
+              {t({
+                sk: "Ďakujeme za spoločnú modlitbu. Nech vás Panna Mária ochraňuje.",
+                en: "Thank you for praying with us. May the Virgin Mary protect you.",
+              })}
+            </p>
+            <div className="flex items-center justify-center gap-3">
+              <button
+                onClick={() => navigate(`/pray/${mysterySetId}/0`)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-rosary-purple text-white text-sm font-medium hover:bg-rosary-purple/90 transition-colors"
+              >
+                <RotateCcw size={16} />
+                {t({ sk: "Zopakovať", en: "Repeat" })}
+              </button>
+              <button
+                onClick={() => navigate("/")}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-stone-100 text-stone-700 text-sm font-medium hover:bg-stone-200 transition-colors"
+              >
+                <Home size={16} />
+                {t({ sk: "Domov", en: "Home" })}
+              </button>
+            </div>
           </div>
-          <h2 className="text-2xl font-bold text-stone-900">
-            {t({ sk: "Ruženec dokončený", en: "Rosary completed" })}
-          </h2>
-          <p className="text-stone-600 max-w-sm mx-auto">
-            {t({
-              sk: "Ďakujeme za spoločnú modlitbu. Nech vás Panna Mária ochraňuje.",
-              en: "Thank you for praying with us. May the Virgin Mary protect you.",
-            })}
-          </p>
-          <div className="flex items-center justify-center gap-3">
-            <button
-              onClick={() => goToStep(0)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-rosary-purple text-white text-sm font-medium hover:bg-rosary-purple/90 transition-colors"
-            >
-              <RotateCcw size={16} />
-              {t({ sk: "Zopakovať", en: "Repeat" })}
-            </button>
-            <button
-              onClick={() => navigate("/")}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-stone-100 text-stone-700 text-sm font-medium hover:bg-stone-200 transition-colors"
-            >
-              <Home size={16} />
-              {t({ sk: "Domov", en: "Home" })}
-            </button>
+        ) : (
+          <PrayerDisplay
+            step={currentStep}
+            mysterySetId={mysterySetId!}
+            decadeIndex={currentDecade}
+            mystery={currentMystery}
+          />
+        )}
+
+        {/* Swipe hint overlay */}
+        {showHint && !isFinished && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none animate-fade-in">
+            <div className="flex flex-col items-center gap-2 text-stone-400">
+              <ChevronUp size={24} className="animate-bounce" />
+              <span className="text-sm font-medium">
+                {t({
+                  sk: "Potiahnite nahor alebo dole",
+                  en: "Swipe up or down",
+                })}
+              </span>
+              <ChevronDown
+                size={24}
+                className="animate-bounce"
+                style={{ animationDelay: "0.15s" }}
+              />
+            </div>
           </div>
-        </div>
-      ) : (
-        <PrayerDisplay
-          step={currentStep}
-          mysterySetId={mysterySetId!}
-          decadeIndex={currentDecade}
-          mystery={currentMystery}
-        />
-      )}
-
-      {/* Navigation buttons */}
-      {!isFinished && (
-        <div className="flex items-center justify-between pt-4">
-          <button
-            onClick={() => canGoBack && goToStep(currentStep - 1)}
-            disabled={!canGoBack}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-colors ${
-              canGoBack
-                ? "bg-stone-100 text-stone-700 hover:bg-stone-200"
-                : "bg-stone-50 text-stone-300 cursor-not-allowed"
-            }`}
-          >
-            <ArrowLeft size={16} />
-            {t({ sk: "Predchádzajúca", en: "Previous" })}
-          </button>
-
-          <button
-            onClick={() => canGoForward && goToStep(currentStep + 1)}
-            disabled={!canGoForward}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-colors ${
-              canGoForward
-                ? "bg-rosary-purple text-white hover:bg-rosary-purple/90"
-                : "bg-stone-100 text-stone-300 cursor-not-allowed"
-            }`}
-          >
-            {t({ sk: "Ďalej", en: "Next" })}
-            <ArrowRight size={16} />
-          </button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

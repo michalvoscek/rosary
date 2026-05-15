@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The core interactive prayer experience. The user steps through all 73 prayers of the selected mystery set. Each step updates the URL, making progress shareable and bookmarkable.
+The core interactive prayer experience. The user steps through all 73 prayers of the selected mystery set by swiping up or down. Each step updates the URL, making progress shareable and bookmarkable.
 
 ## Route
 
@@ -30,21 +30,21 @@ See [`spec/prayer-steps.md`](prayer-steps.md) for the canonical 73-step definiti
   │   ├─ Center: Mystery set title + "Decade X / 5"
   │   └─ Spacer (for centering)
   │
-  ├─ <ProgressIndicator> (progress bar + percentage)
+  ├─ <ProgressIndicator> (stage label + stage progress bar)
   │
   ├─ [if finished]
   │   └─ Completion screen (icon + heading + CTA buttons)
   │
   └─ [if praying]
-      ├─ <PrayerDisplay>
-      │   ├─ Prayer label pill (centered)
-      │   ├─ [if mystery step] Mystery highlight box (purple bg)
-      │   └─ Prayer text card (white bg, centered text)
+      ├─ Swipeable Prayer Area (touch + scroll driven)
+      │   ├─ <PrayerDisplay>
+      │   │   ├─ Prayer label pill (centered)
+      │   │   ├─ [if mystery step] Mystery highlight box (purple bg)
+      │   │   └─ Prayer text card (white bg, centered text)
+      │   │
+      │   └─ [first visit] Swipe hint overlay (up/down arrows + label)
       │
-      └─ Navigation Row
-          ├─ Previous button (disabled at step 0)
-          ├─ Step counter ("3 / 73")
-          └─ Next button (primary, disabled at step 72)
+      └─ Step counter (centered, e.g. "3 / 73")
 ```
 
 ## Sections Detail
@@ -58,8 +58,26 @@ See [`spec/prayer-steps.md`](prayer-steps.md) for the canonical 73-step definiti
 ### Progress Indicator
 
 - Two-part indicator:
-  - **Stage label**: "Start", "Decade 1", "Decade 2", "Decade 3", "Decade 4", or "Decade 5"
+  - **Stage label**: "Úvod / Start", "Desiatok 1 / Decade 1", ..., "Zdravas Kráľovná / Hail Holy Queen"
   - **Stage progress bar**: shows progress within the current stage (Start has 7 steps, each Decade has 13 steps)
+
+### Swipeable Prayer Area
+
+**Gesture control:**
+- **Swipe up** (touch or scroll down) → next prayer step, content slides **up** out and new content slides **up** in
+- **Swipe down** (touch or scroll up) → previous prayer step, content slides **down** out and new content slides **down** in
+- Threshold: 50px for touch, 40px for scroll
+- Ignored while an animation is already in progress
+
+**Animations:**
+- Exit: `0.25s ease-in` (slide 40% off-screen + fade)
+- Entry: `0.3s ease-out` (slide from 40% opposite direction + fade)
+- Direction is passed via `navigate()` state; entry class is applied on mount and cleared after animation completes
+
+**Swipe hint overlay:**
+- Appears on first visit: two bouncing chevrons (up/down) with "Potiahnite nahor alebo dole / Swipe up or down"
+- Auto-dismisses after 4 seconds or on first swipe
+- `pointer-events-none`, fades in
 
 ### Prayer Display
 
@@ -76,11 +94,10 @@ See [`spec/prayer-steps.md`](prayer-steps.md) for the canonical 73-step definiti
   - **Zopakovať / Repeat** (primary, goes to step 0)
   - **Domov / Home** (secondary, goes to `/`)
 
-### Navigation Row
+### Step Counter
 
-- **Previous**: `bg-stone-100`, disabled at step 0
-- **Counter**: `text-xs text-stone-400`, tabular-nums (e.g. "3 / 73")
-- **Next**: `bg-rosary-purple text-white`, disabled at step 72
+- `text-xs text-stone-400`, tabular-nums, centered below prayer area
+- e.g. "3 / 73"
 
 ## Error State
 
@@ -94,5 +111,5 @@ currentDecade = Math.max(0, Math.min(4, Math.floor((step - 7) / 13)));
 
 ## Mobile
 
-- Same layout. Navigation buttons remain visible at bottom.
-- Back button hides label text on small screens (icon only).
+- Swipe gestures are the primary navigation method
+- Back button hides label text on small screens (icon only)
