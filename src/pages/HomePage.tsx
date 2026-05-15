@@ -11,7 +11,7 @@ export function HomePage() {
       {/* All weekdays */}
       <section className="space-y-3">
         <div className="grid gap-3">
-          {[0, 1, 2, 3, 4, 5, 6].map((day) => {
+          {[1, 2, 3, 4, 5, 6, 0].map((day) => {
             const mysterySet = getMysteryForDay(day);
             const isToday = day === today;
             return (

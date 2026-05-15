@@ -88,6 +88,8 @@ Day (getDay())   Mystery
 
 Function: `getTodaysMysterySet()` in `data/mysteries.ts`
 
+The UI displays days Monday → Sunday (ISO 8601 order), though `getDay()` uses Sunday → Saturday.
+
 ---
 
 ## PWA Architecture
