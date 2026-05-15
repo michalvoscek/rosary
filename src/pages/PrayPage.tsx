@@ -4,13 +4,7 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { getMysterySet } from "../data/mysteries";
 import { PrayerDisplay } from "../components/PrayerDisplay";
 import { ProgressIndicator } from "../components/ProgressIndicator";
-import {
-  RotateCcw,
-  Home,
-  ArrowLeft,
-  ChevronUp,
-  ChevronDown,
-} from "lucide-react";
+import { RotateCcw, Home, ArrowLeft, ChevronUp, ChevronDown } from "lucide-react";
 
 const TOTAL_STEPS = 7 + 13 * 5 + 1; // 73
 
@@ -29,18 +23,21 @@ export function PrayPage() {
     Math.min(TOTAL_STEPS - 1, parseInt(step || "0", 10) || 0),
   );
 
-  // Animation state
-  const entryDirection = (
-    location.state as { direction?: "up" | "down" } | null
-  )?.direction;
-  const [exitDirection, setExitDirection] = useState<"up" | "down" | null>(
-    null,
+  // Entry animation: capture direction once on mount, never change it afterwards
+  const entryDirectionRef = useRef<
+    "up" | "down" | "fade" | null
+  >(
+    (location.state as { direction?: "up" | "down" } | null)?.direction ?? "fade",
   );
+  const entryClassAppliedRef = useRef(false);
+
+  const [exitDirection, setExitDirection] = useState<"up" | "down" | null>(null);
   const [showHint, setShowHint] = useState(true);
 
   // Swipe detection refs
   const touchStartY = useRef<number | null>(null);
   const isAnimatingRef = useRef(false);
+  const wheelCooldownRef = useRef(false);
 
   // Track if hint has been dismissed
   const hintDismissedRef = useRef(false);
@@ -53,16 +50,6 @@ export function PrayPage() {
     }, 4000);
     return () => clearTimeout(timer);
   }, []);
-
-  // Entry animation: remove class after animation completes
-  useEffect(() => {
-    if (entryDirection) {
-      const timer = setTimeout(() => {
-        navigate(location.pathname, { replace: true, state: {} });
-      }, 350);
-      return () => clearTimeout(timer);
-    }
-  }, [entryDirection, location.pathname, navigate]);
 
   const goToStep = useCallback(
     (s: number, direction: "up" | "down") => {
@@ -109,29 +96,41 @@ export function PrayPage() {
   // Also handle wheel/trackpad scroll
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
+      if (wheelCooldownRef.current) return;
+
       const delta = e.deltaY;
       const SCROLL_THRESHOLD = 40;
 
+      let navigated = false;
       if (delta > SCROLL_THRESHOLD && currentStep < TOTAL_STEPS - 1) {
         goToStep(currentStep + 1, "up");
+        navigated = true;
       } else if (delta < -SCROLL_THRESHOLD && currentStep > 0) {
         goToStep(currentStep - 1, "down");
+        navigated = true;
+      }
+
+      if (navigated) {
+        wheelCooldownRef.current = true;
+        setTimeout(() => {
+          wheelCooldownRef.current = false;
+        }, 400);
       }
     },
     [currentStep, goToStep],
   );
 
-  const canGoBack = currentStep > 0;
-  const canGoForward = currentStep < TOTAL_STEPS - 1;
   const isFinished = currentStep === TOTAL_STEPS - 1;
 
-  // Entry animation class
-  const entryClass =
-    entryDirection === "up"
-      ? "animate-slide-up-in"
-      : entryDirection === "down"
-        ? "animate-slide-down-in"
-        : "animate-fade-in";
+  // Compute entry animation class exactly once per mount
+  const entryClass = (() => {
+    if (entryClassAppliedRef.current) return "";
+    const dir = entryDirectionRef.current;
+    if (dir === "up") return "animate-slide-up-in";
+    if (dir === "down") return "animate-slide-down-in";
+    return "animate-fade-in";
+  })();
+  entryClassAppliedRef.current = true;
 
   // Exit animation class
   const exitClass =
@@ -168,6 +167,22 @@ export function PrayPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => navigate("/")}
+          className="flex items-center gap-1.5 text-sm text-stone-500 hover:text-stone-800 transition-colors"
+        >
+          <ArrowLeft size={16} />
+          <span className="hidden sm:inline">{t({ sk: "Naspäť", en: "Back" })}</span>
+        </button>
+        <div className="text-center">
+          <h1 className="text-lg font-semibold text-stone-900">{t(mysterySet.title)}</h1>
+          <p className="text-xs text-stone-500">
+            {t({ sk: "Desiatok", en: "Decade" })} {Math.min(currentDecade + 1, 5)} / 5
+          </p>
+        </div>
+        <div className="w-16" />
+      </div>
 
       <ProgressIndicator currentStep={currentStep} />
 
@@ -177,6 +192,7 @@ export function PrayPage() {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         onWheel={handleWheel}
+        style={{ transform: "translateY(0)", opacity: 1 }}
       >
         {isFinished ? (
           <div className="text-center py-12 space-y-6">
@@ -224,20 +240,20 @@ export function PrayPage() {
             <div className="flex flex-col items-center gap-2 text-stone-400">
               <ChevronUp size={24} className="animate-bounce" />
               <span className="text-sm font-medium">
-                {t({
-                  sk: "Potiahnite nahor alebo dole",
-                  en: "Swipe up or down",
-                })}
+                {t({ sk: "Potiahnite nahor alebo dole", en: "Swipe up or down" })}
               </span>
-              <ChevronDown
-                size={24}
-                className="animate-bounce"
-                style={{ animationDelay: "0.15s" }}
-              />
+              <ChevronDown size={24} className="animate-bounce" style={{ animationDelay: "0.15s" }} />
             </div>
           </div>
         )}
       </div>
+
+      {/* Step counter at bottom */}
+      {!isFinished && (
+        <div className="flex items-center justify-center gap-4 text-xs text-stone-400">
+          <span className="tabular-nums">{currentStep + 1} / {TOTAL_STEPS}</span>
+        </div>
+      )}
     </div>
   );
 }
