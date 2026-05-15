@@ -58,7 +58,7 @@
 ### Props
 | Prop | Type | Description |
 |------|------|-------------|
-| `step` | `number` | Current prayer step (0–77) |
+| `step` | `number` | Current prayer step (0–72) |
 | `mysterySetId` | `string` | Mystery set ID |
 | `decadeIndex` | `number` | Current decade (0–4) |
 | `mystery` | `Mystery` | Current mystery object |
@@ -92,7 +92,7 @@ See [`spec/prayer-steps.md`](prayer-steps.md) for the canonical 78-step definiti
 | Prop | Type | Description |
 |------|------|-------------|
 | `currentStep` | `number` | Current step (0-based) |
-| `totalSteps` | `number` | Total steps (78) |
+| `totalSteps` | `number` | Total steps (73) |
 
 ### Structure
 ```

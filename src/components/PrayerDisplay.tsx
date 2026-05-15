@@ -10,84 +10,12 @@ interface PrayerDisplayProps {
   hailMaryCount?: number;
 }
 
-function getPrayerForStep(step: number, mystery: Mystery, hailMaryCount: number): { label: string; text: string } {
-  // Steps:
-  // 0: Sign of the Cross
-  // 1: Apostles' Creed
-  // 2: Our Father
-  // 3-5: 3 Hail Marys
-  // 6: Glory Be
-  // 7-16: Decade (mystery + Our Father + 10 Hail Marys + Glory Be + Fatima)
-  //   7: Mystery announcement
-  //   8: Our Father
-  //   9-18: 10 Hail Marys
-  //   19: Glory Be
-  //   20: Fatima Prayer
-  // Each decade block is 14 steps. 5 decades = 70 steps.
-  // 21-34: Decade 2
-  // 35-48: Decade 3
-  // 49-62: Decade 4
-  // 63-76: Decade 5
-  // 77: Hail Holy Queen
-
-  const { t } = useLanguage();
-
-  if (step === 0) {
-    return { label: t(prayerLabels.signOfTheCross), text: prayers.signOfTheCross.en }; // Will use hook below
-  }
-  if (step === 1) {
-    return { label: t(prayerLabels.apostlesCreed), text: prayers.apostlesCreed.en };
-  }
-  if (step === 2) {
-    return { label: t(prayerLabels.ourFather), text: prayers.ourFather.en };
-  }
-  if (step >= 3 && step <= 5) {
-    return { label: t(prayerLabels.hailMary), text: prayers.hailMaryFull.en };
-  }
-  if (step === 6) {
-    return { label: t(prayerLabels.gloryBe), text: prayers.gloryBe.en };
-  }
-
-  const decadeStart = 7;
-  const blockSize = 14;
-
-  if (step >= decadeStart && step < decadeStart + blockSize * 5) {
-    const offset = step - decadeStart;
-    const block = Math.floor(offset / blockSize);
-    const sub = offset % blockSize;
-
-    if (sub === 0) {
-      return { label: t(prayerLabels.mystery), text: mystery.name.en };
-    }
-    if (sub === 1) {
-      return { label: t(prayerLabels.ourFather), text: prayers.ourFather.en };
-    }
-    if (sub >= 2 && sub <= 11) {
-      return { label: t(prayerLabels.hailMary), text: prayers.hailMaryFull.en };
-    }
-    if (sub === 12) {
-      return { label: t(prayerLabels.gloryBe), text: prayers.gloryBe.en };
-    }
-    if (sub === 13) {
-      return { label: t(prayerLabels.fatimaPrayer), text: prayers.fatimaPrayer.en };
-    }
-  }
-
-  if (step === decadeStart + blockSize * 5) {
-    return { label: t(prayerLabels.hailHolyQueen), text: prayers.hailHolyQueen.en };
-  }
-
-  return { label: '', text: '' };
-}
-
 export function PrayerDisplay({ step, mystery }: PrayerDisplayProps) {
   const { lang } = useLanguage();
+  const l = lang;
+  const t = (obj: { sk: string; en: string }) => obj[l];
 
-  // Re-implement getPrayerForStep with direct lang access
   const getPrayer = (s: number): { label: string; text: string } => {
-    const l = lang;
-    const t = (obj: { sk: string; en: string }) => obj[l];
-
     if (s === 0) {
       return { label: t(prayerLabels.signOfTheCross), text: t(prayers.signOfTheCross) };
     }
@@ -105,25 +33,22 @@ export function PrayerDisplay({ step, mystery }: PrayerDisplayProps) {
     }
 
     const decadeStart = 7;
-    const blockSize = 14;
+    const blockSize = 13;
 
     if (s >= decadeStart && s < decadeStart + blockSize * 5) {
       const offset = s - decadeStart;
       const sub = offset % blockSize;
 
       if (sub === 0) {
-        return { label: t(prayerLabels.mystery), text: t(mystery.name) };
-      }
-      if (sub === 1) {
         return { label: t(prayerLabels.ourFather), text: t(prayers.ourFather) };
       }
-      if (sub >= 2 && sub <= 11) {
-        return { label: `${t(prayerLabels.hailMary)} (${sub - 1}/10)`, text: t(prayers.hailMaryFull) };
+      if (sub >= 1 && sub <= 10) {
+        return { label: `${t(prayerLabels.hailMary)} (${sub}/10)`, text: t(prayers.hailMaryFull) };
       }
-      if (sub === 12) {
+      if (sub === 11) {
         return { label: t(prayerLabels.gloryBe), text: t(prayers.gloryBe) };
       }
-      if (sub === 13) {
+      if (sub === 12) {
         return { label: t(prayerLabels.fatimaPrayer), text: t(prayers.fatimaPrayer) };
       }
     }
@@ -137,12 +62,12 @@ export function PrayerDisplay({ step, mystery }: PrayerDisplayProps) {
 
   const { label, text } = getPrayer(step);
 
-  // Determine what to show for the mystery step
-  const isMysteryStep = () => {
+  // Show mystery highlight on the Our Father step at the start of each decade
+  const isMysteryStep = (s: number) => {
     const decadeStart = 7;
-    const blockSize = 14;
-    if (step >= decadeStart && step < decadeStart + blockSize * 5) {
-      const offset = step - decadeStart;
+    const blockSize = 13;
+    if (s >= decadeStart && s < decadeStart + blockSize * 5) {
+      const offset = s - decadeStart;
       const sub = offset % blockSize;
       return sub === 0;
     }
@@ -157,7 +82,7 @@ export function PrayerDisplay({ step, mystery }: PrayerDisplayProps) {
         </span>
       </div>
 
-      {isMysteryStep() && (
+      {isMysteryStep(step) && (
         <div className="bg-rosary-purple/5 border border-rosary-purple/20 rounded-2xl p-6 text-center">
           <p className="text-sm text-rosary-purple font-medium uppercase tracking-wide mb-2">
             {lang === 'sk' ? 'Tajomstvo' : 'Mystery'}

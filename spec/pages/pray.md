@@ -1,11 +1,11 @@
 # Page: Pray (`/pray/:mysterySetId/:step?`)
 
 ## Purpose
-The core interactive prayer experience. The user steps through all 78 prayers of the selected mystery set. Each step updates the URL, making progress shareable and bookmarkable.
+The core interactive prayer experience. The user steps through all 73 prayers of the selected mystery set. Each step updates the URL, making progress shareable and bookmarkable.
 
 ## Route
 - `/pray/:mysterySetId` → redirects to step 0
-- `/pray/:mysterySetId/:step` → specific prayer step (0–77)
+- `/pray/:mysterySetId/:step` → specific prayer step (0–72)
 
 ## URL-Driven State
 ```
@@ -68,8 +68,8 @@ See [`spec/prayer-steps.md`](prayer-steps.md) for the canonical 78-step definiti
 
 ### Navigation Row
 - **Previous**: `bg-stone-100`, disabled at step 0
-- **Counter**: `text-xs text-stone-400`, tabular-nums
-- **Next**: `bg-rosary-purple text-white`, disabled at last step
+- **Counter**: `text-xs text-stone-400`, tabular-nums (e.g. "3 / 73")
+- **Next**: `bg-rosary-purple text-white`, disabled at step 72
 
 ## Error State
 If `mysterySetId` is invalid, shows centered "Tajomstvo nenájdené / Mystery not found" with a "Back home" button.

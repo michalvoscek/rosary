@@ -5,7 +5,7 @@ import { PrayerDisplay } from '../components/PrayerDisplay';
 import { ProgressIndicator } from '../components/ProgressIndicator';
 import { ArrowLeft, ArrowRight, RotateCcw, Home } from 'lucide-react';
 
-const TOTAL_STEPS = 7 + 14 * 5 + 1; // opening 7 + 5 decades * 14 + closing 1 = 78
+const TOTAL_STEPS = 7 + 13 * 5 + 1; // opening 7 + 5 decades * 13 + closing 1 = 73
 
 export function PrayPage() {
   const { mysterySetId, step } = useParams<{ mysterySetId: string; step?: string }>();
@@ -30,7 +30,7 @@ export function PrayPage() {
     );
   }
 
-  const currentDecade = Math.max(0, Math.min(4, Math.floor((currentStep - 7) / 14)));
+  const currentDecade = Math.max(0, Math.min(4, Math.floor((currentStep - 7) / 13)));
   const currentMystery = mysterySet.decades[currentDecade] || mysterySet.decades[0];
 
   const goToStep = (s: number) => {
