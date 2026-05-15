@@ -61,18 +61,11 @@
 | `step` | `number` | Current prayer step (0–72) |
 | `mysterySetId` | `string` | Mystery set ID |
 | `decadeIndex` | `number` | Current decade (0–4) |
-| `mystery` | `Mystery` | Current mystery object |
 
 ### Structure
 ```
 <div space-y-6>
   ├─ Label pill (centered, text-xs, bg-stone-100)
-  │
-  ├─ [if mystery announcement step]
-  │   └─ Mystery Highlight Box (bg-rosary-purple/5, border, centered)
-  │       ├─ "Tajomstvo / Mystery" label
-  │       ├─ Mystery name (text-2xl bold)
-  │       └─ Mystery description
   │
   └─ Prayer Text Card (bg-white, border, rounded-2xl, p-6 sm:p-8)
       └─ Text (text-lg sm:text-xl, centered, leading-relaxed)

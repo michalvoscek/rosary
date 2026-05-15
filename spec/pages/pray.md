@@ -33,9 +33,8 @@ See [`spec/prayer-steps.md`](prayer-steps.md) for the canonical 73-step definiti
   └─ [if praying]
       └─ Swipeable Prayer Area (touch + scroll driven)
           ├─ <PrayerDisplay>
-          │   ├─ Prayer label pill (centered)
-          │   ├─ [if mystery step] Mystery highlight box (purple bg)
-          │   └─ Prayer text card (white bg, centered text)
+           │   ├─ Prayer label pill (centered)
+           │   └─ Prayer text card (white bg, centered text)
           │
           └─ [first visit] Swipe hint overlay (up/down arrows + label)
 ```
@@ -69,7 +68,6 @@ See [`spec/prayer-steps.md`](prayer-steps.md) for the canonical 73-step definiti
 ### Prayer Display
 
 - **Label pill**: `inline-block`, `bg-stone-100 text-stone-600`, rounded-full
-- **Mystery highlight** (only on mystery announcement steps): `bg-rosary-purple/5`, rounded-2xl, centered. Shows mystery name (large bold) and description.
 - **Text card**: `bg-white`, `rounded-2xl`, `border border-stone-200`, `p-6 sm:p-8`. Prayer text in `text-lg sm:text-xl`, `text-center`, `leading-relaxed`.
 
 ### Completion Screen
