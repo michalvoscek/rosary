@@ -7,7 +7,6 @@ import { ProgressIndicator } from "../components/ProgressIndicator";
 import {
   RotateCcw,
   Home,
-  ArrowLeft,
   ChevronUp,
   ChevronDown,
 } from "lucide-react";
@@ -172,24 +171,6 @@ export function PrayPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <button
-          onClick={() => navigate("/")}
-          className="flex items-center gap-1.5 text-sm text-stone-500 hover:text-stone-800 transition-colors"
-        >
-          <ArrowLeft size={16} />
-          <span className="hidden sm:inline">{t({ sk: "Naspäť", en: "Back" })}</span>
-        </button>
-        <div className="text-center">
-          <h1 className="text-lg font-semibold text-stone-900">{t(mysterySet.title)}</h1>
-          <p className="text-xs text-stone-500">
-            {t({ sk: "Desiatok", en: "Decade" })} {Math.min(currentDecade + 1, 5)} / 5
-          </p>
-        </div>
-        <div className="w-16" />
-      </div>
-
       <ProgressIndicator currentStep={currentStep} />
 
       {/* Swipeable prayer area */}
@@ -261,12 +242,6 @@ export function PrayPage() {
         )}
       </div>
 
-      {/* Step counter at bottom */}
-      {!isFinished && (
-        <div className="flex items-center justify-center gap-4 text-xs text-stone-400">
-          <span className="tabular-nums">{currentStep + 1} / {TOTAL_STEPS}</span>
-        </div>
-      )}
     </div>
   );
 }

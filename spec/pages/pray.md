@@ -25,35 +25,22 @@ See [`spec/prayer-steps.md`](prayer-steps.md) for the canonical 73-step definiti
 
 ```
 <main>
-  ├─ Header Row
-  │   ├─ Back button (→ "/")
-  │   ├─ Center: Mystery set title + "Decade X / 5"
-  │   └─ Spacer (for centering)
-  │
   ├─ <ProgressIndicator> (stage label + stage progress bar)
   │
   ├─ [if finished]
   │   └─ Completion screen (icon + heading + CTA buttons)
   │
   └─ [if praying]
-      ├─ Swipeable Prayer Area (touch + scroll driven)
-      │   ├─ <PrayerDisplay>
-      │   │   ├─ Prayer label pill (centered)
-      │   │   ├─ [if mystery step] Mystery highlight box (purple bg)
-      │   │   └─ Prayer text card (white bg, centered text)
-      │   │
-      │   └─ [first visit] Swipe hint overlay (up/down arrows + label)
-      │
-      └─ Step counter (centered, e.g. "3 / 73")
+      └─ Swipeable Prayer Area (touch + scroll driven)
+          ├─ <PrayerDisplay>
+          │   ├─ Prayer label pill (centered)
+          │   ├─ [if mystery step] Mystery highlight box (purple bg)
+          │   └─ Prayer text card (white bg, centered text)
+          │
+          └─ [first visit] Swipe hint overlay (up/down arrows + label)
 ```
 
 ## Sections Detail
-
-### Header Row
-
-- Back: `<ArrowLeft>` + "Naspäť / Back"
-- Title: `mysterySet.title` in current language
-- Subtitle: "Desiatok X / 5" in current language
 
 ### Progress Indicator
 
@@ -93,11 +80,6 @@ See [`spec/prayer-steps.md`](prayer-steps.md) for the canonical 73-step definiti
 - Two buttons:
   - **Zopakovať / Repeat** (primary, goes to step 0)
   - **Domov / Home** (secondary, goes to `/`)
-
-### Step Counter
-
-- `text-xs text-stone-400`, tabular-nums, centered below prayer area
-- e.g. "3 / 73"
 
 ## Error State
 
