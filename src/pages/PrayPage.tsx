@@ -116,10 +116,6 @@ export function PrayPage() {
             {t({ sk: "Predchádzajúca", en: "Previous" })}
           </button>
 
-          <span className="text-xs text-stone-400 font-medium tabular-nums">
-            {currentStep + 1} / {TOTAL_STEPS}
-          </span>
-
           <button
             onClick={() => canGoForward && goToStep(currentStep + 1)}
             disabled={!canGoForward}
