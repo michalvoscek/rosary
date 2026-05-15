@@ -1,12 +1,11 @@
 import { useLanguage } from '../contexts/LanguageContext';
-import { mysterySets, getTodaysMysterySet } from '../data/mysteries';
+import { getMysteryForDay, weekdayNames } from '../data/mysteries';
 import { MysteryCard } from '../components/MysteryCard';
-import { Calendar, ChevronRight } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 
 export function HomePage() {
   const { t } = useLanguage();
-  const today = getTodaysMysterySet();
-  const todayId = today.id;
+  const today = new Date().getDay();
 
   const todayName = new Date().toLocaleDateString('sk-SK', {
     weekday: 'long',
@@ -33,29 +32,29 @@ export function HomePage() {
         </p>
       </section>
 
-      {/* Today's recommendation */}
+      {/* All weekdays */}
       <section className="space-y-3">
         <div className="flex items-center gap-2 text-sm font-semibold text-stone-700 uppercase tracking-wide">
           <span className="w-6 h-px bg-stone-300" />
-          {t({ sk: 'Dnes sa modlíme', en: 'Pray today' })}
-          <span className="w-6 h-px bg-stone-300" />
-        </div>
-        <MysteryCard mysterySet={today} isRecommended />
-      </section>
-
-      {/* All mysteries */}
-      <section className="space-y-3">
-        <div className="flex items-center gap-2 text-sm font-semibold text-stone-700 uppercase tracking-wide">
-          <span className="w-6 h-px bg-stone-300" />
-          {t({ sk: 'Všetky tajomstvá', en: 'All mysteries' })}
+          {t({ sk: 'Dni v týždni', en: 'Weekdays' })}
           <span className="w-6 h-px bg-stone-300" />
         </div>
         <div className="grid gap-3">
-          {mysterySets
-            .filter((m) => m.id !== todayId)
-            .map((mysterySet) => (
-              <MysteryCard key={mysterySet.id} mysterySet={mysterySet} />
-            ))}
+          {[0, 1, 2, 3, 4, 5, 6].map((day) => {
+            const mysterySet = getMysteryForDay(day);
+            const isToday = day === today;
+            return (
+              <MysteryCard
+                key={day}
+                mysterySet={mysterySet}
+                isRecommended={isToday}
+                weekdayLabel={t({
+                  sk: weekdayNames.sk[day],
+                  en: weekdayNames.en[day],
+                })}
+              />
+            );
+          })}
         </div>
       </section>
     </div>

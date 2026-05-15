@@ -61,20 +61,28 @@ export function getMysterySet(id: string): typeof mysterySets[number] | undefine
 
 export function getTodaysMysterySet(): typeof mysterySets[number] {
   const day = new Date().getDay();
-  // 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
+  return getMysteryForDay(day);
+}
+
+export function getMysteryForDay(day: number): typeof mysterySets[number] {
   switch (day) {
-    case 1:
-    case 6:
+    case 1: // Monday
+    case 6: // Saturday
       return mysterySets[0]; // joyful
-    case 2:
-    case 5:
+    case 2: // Tuesday
+    case 5: // Friday
       return mysterySets[1]; // sorrowful
-    case 3:
-    case 0:
+    case 3: // Wednesday
+    case 0: // Sunday
       return mysterySets[2]; // glorious
-    case 4:
+    case 4: // Thursday
       return mysterySets[3]; // luminous
     default:
       return mysterySets[0];
   }
 }
+
+export const weekdayNames: { sk: string[]; en: string[] } = {
+  sk: ['Nedeľa', 'Pondelok', 'Utorok', 'Streda', 'Štvrtok', 'Piatok', 'Sobota'],
+  en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+};

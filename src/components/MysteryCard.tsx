@@ -5,9 +5,10 @@ import type { MysterySetData } from '../types';
 interface MysteryCardProps {
   mysterySet: MysterySetData;
   isRecommended?: boolean;
+  weekdayLabel?: string;
 }
 
-export function MysteryCard({ mysterySet, isRecommended = false }: MysteryCardProps) {
+export function MysteryCard({ mysterySet, isRecommended = false, weekdayLabel }: MysteryCardProps) {
   const { t } = useLanguage();
 
   return (
@@ -18,7 +19,7 @@ export function MysteryCard({ mysterySet, isRecommended = false }: MysteryCardPr
       <div className="flex items-start justify-between mb-2">
         <div>
           <h3 className="font-semibold text-lg text-stone-900">{t(mysterySet.title)}</h3>
-          <p className="text-sm text-stone-500">{t(mysterySet.subtitle)}</p>
+          <p className="text-sm text-stone-500">{weekdayLabel || t(mysterySet.subtitle)}</p>
         </div>
         {isRecommended && (
           <span

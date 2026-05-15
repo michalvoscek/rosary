@@ -19,6 +19,6 @@ The landing page. Shows all weekdays but highlights mystery for current weekday.
 
 ### All weekdays
 
-- Every weekday has mystery assigned
-- Current weekday has isRecommended set to true
-- Each is a `<MysteryCard>` without the recommendation badge
+- Every weekday has a mystery assigned
+- The current weekday has `isRecommended` set to `true`
+- Each is a `<MysteryCard>`
