@@ -4,7 +4,13 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { getMysterySet } from "../data/mysteries";
 import { PrayerDisplay } from "../components/PrayerDisplay";
 import { ProgressIndicator } from "../components/ProgressIndicator";
-import { RotateCcw, Home, ArrowLeft, ChevronUp, ChevronDown } from "lucide-react";
+import {
+  RotateCcw,
+  Home,
+  ArrowLeft,
+  ChevronUp,
+  ChevronDown,
+} from "lucide-react";
 
 const TOTAL_STEPS = 7 + 13 * 5 + 1; // 73
 
@@ -24,14 +30,24 @@ export function PrayPage() {
   );
 
   // Entry animation: capture direction once on mount, never change it afterwards
-  const [entryClass] = useState(() => {
-    const dir = (location.state as { direction?: "up" | "down" } | null)?.direction;
+  const [entryClass, setEntryClass] = useState(() => {
+    const dir = (location.state as { direction?: "up" | "down" } | null)
+      ?.direction;
     if (dir === "up") return "animate-slide-up-in";
     if (dir === "down") return "animate-slide-down-in";
     return "animate-fade-in";
   });
 
-  const [exitDirection, setExitDirection] = useState<"up" | "down" | null>(null);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setEntryClass("");
+    }, 350);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const [exitDirection, setExitDirection] = useState<"up" | "down" | null>(
+    null,
+  );
   const [showHint, setShowHint] = useState(true);
 
   // Swipe detection refs
@@ -230,9 +246,16 @@ export function PrayPage() {
             <div className="flex flex-col items-center gap-2 text-stone-400">
               <ChevronUp size={24} className="animate-bounce" />
               <span className="text-sm font-medium">
-                {t({ sk: "Potiahnite nahor alebo dole", en: "Swipe up or down" })}
+                {t({
+                  sk: "Potiahnite nahor alebo dole",
+                  en: "Swipe up or down",
+                })}
               </span>
-              <ChevronDown size={24} className="animate-bounce" style={{ animationDelay: "0.15s" }} />
+              <ChevronDown
+                size={24}
+                className="animate-bounce"
+                style={{ animationDelay: "0.15s" }}
+              />
             </div>
           </div>
         )}
