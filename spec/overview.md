@@ -22,16 +22,14 @@ A bilingual (Slovak / English) Progressive Web App for praying the Rosary. Progr
 
 | Page | Route | Purpose |
 |------|-------|---------|
-| **Home** | `/` | Landing, today's mystery recommendation, all mystery sets |
+| **Home** | `/` | Landing, shows all weekdays with assigned mysteries |
 | **Pray** | `/pray/:mysterySetId/:step?` | Interactive prayer flow (78 steps per mystery set) |
-| **About** | `/about` | How to pray the rosary, daily schedule, prayer structure |
 
 ---
 
 ## Global Layout
 All pages are wrapped in `Layout.tsx`:
-- **Sticky header** (top): Logo + nav links + language toggle (`SK` / `EN`)
-- **Mobile bottom nav**: Home + About (hidden on `sm:` screens)
+- **Sticky header** (top): Logo + language toggle (`SK` / `EN`)
 - **Main content area**: `max-w-2xl`, centered, `px-4` padding
 - **Background**: `bg-stone-50` with white cards on top
 

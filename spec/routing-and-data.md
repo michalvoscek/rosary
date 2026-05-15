@@ -4,8 +4,7 @@
 
 | Path | Component | Purpose |
 |------|-----------|---------|
-| `/` | `HomePage` | Landing, mystery selection |
-| `/about` | `AboutPage` | Instructions & schedule |
+| `/` | `HomePage` | Landing, weekday mystery selection |
 | `/pray/:mysterySetId` | `PrayPage` | Start rosary at step 0 |
 | `/pray/:mysterySetId/:step` | `PrayPage` | Resume at specific step |
 | `*` | `Navigate to /` | 404 redirect |

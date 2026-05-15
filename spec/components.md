@@ -14,25 +14,11 @@
   ├─ <header> (sticky top-0, z-50)
   │   └─ <div> max-w-2xl, h-14, flex justify-between
   │       ├─ Logo (BookOpen + "Rosary")
-  │       ├─ Desktop nav (hidden on mobile)
-  │       │   └─ Links: Home, About (active state styling)
   │       └─ Language toggle (Globe + "SK" | "EN")
-  │
-  ├─ <nav> (mobile bottom nav, sm:hidden)
-  │   └─ Links: Home, About (icon + label)
   │
   ├─ <main> (flex-1, max-w-2xl, mx-auto, px-4, py-6 sm:py-8)
   │   └─ {children}
-  │
-  └─ <div> (mobile spacer, sm:hidden, h-14)
 ```
-
-### Active State
-Uses `useLocation()` to determine active route:
-- Home (`/`): exact match
-- About (`/about`): starts with `/about`
-- Active: `bg-rosary-purple/10 text-rosary-purple`
-- Inactive: `text-stone-500 hover:text-stone-800 hover:bg-stone-100`
 
 ### Language Toggle
 - Button with `<Globe size={16} />` + uppercase language code
@@ -49,17 +35,14 @@ Uses `useLocation()` to determine active route:
 |------|------|-------------|
 | `mysterySet` | `MysterySetData` | The mystery set to display |
 | `isRecommended` | `boolean` | Show "Dnes / Today" badge |
+| `weekdayLabel` | `string` | Optional weekday name to show instead of subtitle |
 
 ### Structure
 ```
 <a> (block, rounded-2xl, border, bg-white, hover:shadow-md, active:scale-[0.98])
   ├─ Header Row (flex justify-between)
-  │   ├─ Title + Subtitle
+  │   ├─ Title + Subtitle (or weekdayLabel)
   │   └─ [if isRecommended] Badge (rounded-full, white text, mystery color bg)
-  │
-  ├─ Decade info (color dot + "5 desiatok / 5 decades")
-  │
-  └─ CTA ("Začať modlitbu / Start praying" + ArrowRight)
 ```
 
 ### Interactions
