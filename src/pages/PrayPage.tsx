@@ -24,12 +24,12 @@ export function PrayPage() {
   );
 
   // Entry animation: capture direction once on mount, never change it afterwards
-  const entryDirectionRef = useRef<
-    "up" | "down" | "fade" | null
-  >(
-    (location.state as { direction?: "up" | "down" } | null)?.direction ?? "fade",
-  );
-  const entryClassAppliedRef = useRef(false);
+  const [entryClass] = useState(() => {
+    const dir = (location.state as { direction?: "up" | "down" } | null)?.direction;
+    if (dir === "up") return "animate-slide-up-in";
+    if (dir === "down") return "animate-slide-down-in";
+    return "animate-fade-in";
+  });
 
   const [exitDirection, setExitDirection] = useState<"up" | "down" | null>(null);
   const [showHint, setShowHint] = useState(true);
@@ -121,16 +121,6 @@ export function PrayPage() {
   );
 
   const isFinished = currentStep === TOTAL_STEPS - 1;
-
-  // Compute entry animation class exactly once per mount
-  const entryClass = (() => {
-    if (entryClassAppliedRef.current) return "";
-    const dir = entryDirectionRef.current;
-    if (dir === "up") return "animate-slide-up-in";
-    if (dir === "down") return "animate-slide-down-in";
-    return "animate-fade-in";
-  })();
-  entryClassAppliedRef.current = true;
 
   // Exit animation class
   const exitClass =
