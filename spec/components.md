@@ -81,21 +81,7 @@
 ### Step Mapping Logic
 The component contains a `getPrayer(s: number)` function that returns `{ label, text }` based on the step number. It uses the current language from `useLanguage()` to select the correct text.
 
-Key step ranges:
-- 0: Sign of the Cross
-- 1: Apostles' Creed
-- 2: Our Father
-- 3–5: Hail Mary (3×)
-- 6: Glory Be
-- 7–20: Decade 1 (mystery + Our Father + 10 Hail Marys + Glory Be + Fatima)
-- 21–34: Decade 2
-- 35–48: Decade 3
-- 49–62: Decade 4
-- 63–76: Decade 5
-- 77: Hail Holy Queen
-
-### Hail Mary Counting
-Hail Mary steps within a decade show the count: "Zdravas Mária (1/10)"
+See [`spec/prayer-steps.md`](prayer-steps.md) for the canonical 78-step definition.
 
 ---
 

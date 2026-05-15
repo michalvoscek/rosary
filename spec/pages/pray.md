@@ -13,24 +13,9 @@ step = parseInt(useParams().step, 10) || 0
 ```
 Navigation uses `navigate()` to update the URL; there is no React state for progress.
 
-## Total Steps: 78
-```
-0    Sign of the Cross
-1    Apostles' Creed
-2    Our Father
-3-5  3 × Hail Mary
-6    Glory Be
-7    Mystery 1 Announcement
-8    Our Father
-9-18 10 × Hail Mary
-19   Glory Be
-20   Fatima Prayer
-21-34  Mystery 2 (same 14-step block)
-35-48  Mystery 3
-49-62  Mystery 4
-63-76  Mystery 5
-77   Hail Holy Queen
-```
+## Prayer Step Sequence
+
+See [`spec/prayer-steps.md`](prayer-steps.md) for the canonical 78-step definition.
 
 ## Layout
 ```
