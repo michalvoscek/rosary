@@ -1,23 +1,28 @@
 # Page: Pray (`/pray/:mysterySetId/:step?`)
 
 ## Purpose
+
 The core interactive prayer experience. The user steps through all 73 prayers of the selected mystery set. Each step updates the URL, making progress shareable and bookmarkable.
 
 ## Route
+
 - `/pray/:mysterySetId` → redirects to step 0
 - `/pray/:mysterySetId/:step` → specific prayer step (0–72)
 
 ## URL-Driven State
+
 ```
 step = parseInt(useParams().step, 10) || 0
 ```
+
 Navigation uses `navigate()` to update the URL; there is no React state for progress.
 
 ## Prayer Step Sequence
 
-See [`spec/prayer-steps.md`](prayer-steps.md) for the canonical 78-step definition.
+See [`spec/prayer-steps.md`](prayer-steps.md) for the canonical 73-step definition.
 
 ## Layout
+
 ```
 <main>
   ├─ Header Row
@@ -38,27 +43,32 @@ See [`spec/prayer-steps.md`](prayer-steps.md) for the canonical 78-step definiti
       │
       └─ Navigation Row
           ├─ Previous button (disabled at step 0)
-          ├─ Step counter ("3 / 78")
-          └─ Next button (primary, disabled at step 77)
+          ├─ Step counter ("3 / 73")
+          └─ Next button (primary, disabled at step 72)
 ```
 
 ## Sections Detail
 
 ### Header Row
+
 - Back: `<ArrowLeft>` + "Naspäť / Back"
 - Title: `mysterySet.title` in current language
 - Subtitle: "Desiatok X / 5" in current language
 
 ### Progress Indicator
-- Label row: "Pokrok / Progress" + percentage
-- Bar: `h-2`, `bg-stone-200` track, `bg-rosary-purple` fill, animated width
+
+- Two-part indicator:
+  - **Stage label**: "Start", "Decade 1", "Decade 2", "Decade 3", "Decade 4", or "Decade 5"
+  - **Stage progress bar**: shows progress within the current stage (Start has 7 steps, each Decade has 13 steps)
 
 ### Prayer Display
+
 - **Label pill**: `inline-block`, `bg-stone-100 text-stone-600`, rounded-full
 - **Mystery highlight** (only on mystery announcement steps): `bg-rosary-purple/5`, rounded-2xl, centered. Shows mystery name (large bold) and description.
 - **Text card**: `bg-white`, `rounded-2xl`, `border border-stone-200`, `p-6 sm:p-8`. Prayer text in `text-lg sm:text-xl`, `text-center`, `leading-relaxed`.
 
 ### Completion Screen
+
 - Large icon in circle (`bg-rosary-purple/10`, `<RotateCcw size={32} />`)
 - Heading: "Ruženec dokončený / Rosary completed"
 - Subtitle paragraph
@@ -67,18 +77,22 @@ See [`spec/prayer-steps.md`](prayer-steps.md) for the canonical 78-step definiti
   - **Domov / Home** (secondary, goes to `/`)
 
 ### Navigation Row
+
 - **Previous**: `bg-stone-100`, disabled at step 0
 - **Counter**: `text-xs text-stone-400`, tabular-nums (e.g. "3 / 73")
 - **Next**: `bg-rosary-purple text-white`, disabled at step 72
 
 ## Error State
+
 If `mysterySetId` is invalid, shows centered "Tajomstvo nenájdené / Mystery not found" with a "Back home" button.
 
 ## Decade Calculation
+
 ```ts
-currentDecade = Math.max(0, Math.min(4, Math.floor((step - 7) / 14)))
+currentDecade = Math.max(0, Math.min(4, Math.floor((step - 7) / 13)));
 ```
 
 ## Mobile
+
 - Same layout. Navigation buttons remain visible at bottom.
 - Back button hides label text on small screens (icon only).

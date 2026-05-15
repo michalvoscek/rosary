@@ -62,7 +62,7 @@ export function PrayPage() {
         <div className="w-16" />
       </div>
 
-      <ProgressIndicator currentStep={currentStep} totalSteps={TOTAL_STEPS} />
+      <ProgressIndicator currentStep={currentStep} />
 
       {isFinished ? (
         <div className="text-center py-12 space-y-6">

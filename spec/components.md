@@ -91,15 +91,15 @@ See [`spec/prayer-steps.md`](prayer-steps.md) for the canonical 78-step definiti
 ### Props
 | Prop | Type | Description |
 |------|------|-------------|
-| `currentStep` | `number` | Current step (0-based) |
-| `totalSteps` | `number` | Total steps (73) |
+| `currentStep` | `number` | Current step (0–72) |
 
 ### Structure
 ```
 <div space-y-2>
-  ├─ Row (flex justify-between, text-xs text-stone-500)
-  │   ├─ "Pokrok / Progress"
-  │   └─ "{percentage}%"
+  ├─ Row (flex justify-between, text-xs)
+  │   ├─ Stage label (font-medium text-stone-700)
+  │   │   e.g. "Úvod / Start", "Decade 1", "Zdravas Kráľovná / Hail Holy Queen"
+  │   └─ Stage percentage (text-stone-500)
   │
   └─ Bar (h-2, bg-stone-200, rounded-full, overflow-hidden)
       └─ Fill (h-full, bg-rosary-purple, rounded-full, animated)
