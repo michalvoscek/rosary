@@ -2,6 +2,7 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { prayers, prayerLabels } from "../data/prayers";
 import { mysteryMeditations } from "../data/mysteryMeditations";
 import type { Mystery } from "../types";
+import type { ReactNode } from "react";
 
 interface PrayerDisplayProps {
   step: number;
@@ -11,14 +12,27 @@ interface PrayerDisplayProps {
   hailMaryCount?: number;
 }
 
-/**
- * Insert meditation text after "Ježiš" (SK) or "Jesus" (EN) in the Hail Mary prayer.
- * The text is inserted between "Ježiš/Jesus" and the following period.
- */
-function insertMeditationText(baseText: string, lang: string, meditationText: string): string {
+function buildHailMaryWithMeditation(
+  baseText: string,
+  lang: string,
+  meditationText: string
+): ReactNode {
   const targetWord = lang === 'sk' ? 'Ježiš' : 'Jesus';
-  // Replace "Ježiš." with "Ježiš, [meditationText]."
-  return baseText.replace(`${targetWord}.`, `${targetWord}, ${meditationText}.`);
+  const parts = baseText.split(`${targetWord}.`);
+
+  if (parts.length !== 2) {
+    // Fallback if split doesn't work as expected
+    return baseText;
+  }
+
+  return (
+    <>
+      {parts[0]}{targetWord},
+      {'\n'}
+      <strong>{meditationText}</strong>
+      .{parts[1]}
+    </>
+  );
 }
 
 export function PrayerDisplay({ step, mysterySetId }: PrayerDisplayProps) {
@@ -26,7 +40,7 @@ export function PrayerDisplay({ step, mysterySetId }: PrayerDisplayProps) {
   const l = lang;
   const t = (obj: { sk: string; en: string }) => obj[l];
 
-  const getPrayer = (s: number): { label: string; text: string } => {
+  const getPrayer = (s: number): { label: string; text: ReactNode } => {
     if (s === 0) {
       return {
         label: t(prayerLabels.signOfTheCross),
@@ -45,11 +59,11 @@ export function PrayerDisplay({ step, mysterySetId }: PrayerDisplayProps) {
     if (s >= 3 && s <= 5) {
       const baseText = t(prayers.hailMaryFull);
       const meditations = mysteryMeditations[mysterySetId];
-      let text = baseText;
+      let text: ReactNode = baseText;
       if (meditations) {
         const startKey = s === 3 ? 'start1' : s === 4 ? 'start2' : 'start3';
         const meditationText = t(meditations[startKey as keyof typeof meditations]);
-        text = insertMeditationText(baseText, l, meditationText);
+        text = buildHailMaryWithMeditation(baseText, l, meditationText);
       }
       return { label: t(prayerLabels.hailMary), text };
     }
@@ -71,11 +85,11 @@ export function PrayerDisplay({ step, mysterySetId }: PrayerDisplayProps) {
       if (sub >= 1 && sub <= 10) {
         const baseText = t(prayers.hailMaryFull);
         const meditations = mysteryMeditations[mysterySetId];
-        let text = baseText;
+        let text: ReactNode = baseText;
         if (meditations) {
           const decadeKey = `decade${decade + 1}` as keyof typeof meditations;
           const meditationText = t(meditations[decadeKey]);
-          text = insertMeditationText(baseText, l, meditationText);
+          text = buildHailMaryWithMeditation(baseText, l, meditationText);
         }
         return {
           label: `${t(prayerLabels.hailMary)} (${sub}/10)`,
