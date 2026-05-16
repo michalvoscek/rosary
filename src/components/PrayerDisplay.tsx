@@ -1,5 +1,6 @@
 import { useLanguage } from "../contexts/LanguageContext";
 import { prayers, prayerLabels } from "../data/prayers";
+import { mysteryMeditations } from "../data/mysteryMeditations";
 import type { Mystery } from "../types";
 
 interface PrayerDisplayProps {
@@ -10,7 +11,17 @@ interface PrayerDisplayProps {
   hailMaryCount?: number;
 }
 
-export function PrayerDisplay({ step }: PrayerDisplayProps) {
+/**
+ * Insert meditation text after "Ježiš" (SK) or "Jesus" (EN) in the Hail Mary prayer.
+ * The text is inserted between "Ježiš/Jesus" and the following period.
+ */
+function insertMeditationText(baseText: string, lang: string, meditationText: string): string {
+  const targetWord = lang === 'sk' ? 'Ježiš' : 'Jesus';
+  // Replace "Ježiš." with "Ježiš, [meditationText]."
+  return baseText.replace(`${targetWord}.`, `${targetWord}, ${meditationText}.`);
+}
+
+export function PrayerDisplay({ step, mysterySetId }: PrayerDisplayProps) {
   const { lang } = useLanguage();
   const l = lang;
   const t = (obj: { sk: string; en: string }) => obj[l];
@@ -32,7 +43,15 @@ export function PrayerDisplay({ step }: PrayerDisplayProps) {
       return { label: t(prayerLabels.ourFather), text: t(prayers.ourFather) };
     }
     if (s >= 3 && s <= 5) {
-      return { label: t(prayerLabels.hailMary), text: t(prayers.hailMaryFull) };
+      const baseText = t(prayers.hailMaryFull);
+      const meditations = mysteryMeditations[mysterySetId];
+      let text = baseText;
+      if (meditations) {
+        const startKey = s === 3 ? 'start1' : s === 4 ? 'start2' : 'start3';
+        const meditationText = t(meditations[startKey as keyof typeof meditations]);
+        text = insertMeditationText(baseText, l, meditationText);
+      }
+      return { label: t(prayerLabels.hailMary), text };
     }
     if (s === 6) {
       return { label: t(prayerLabels.gloryBe), text: t(prayers.gloryBe) };
@@ -43,15 +62,24 @@ export function PrayerDisplay({ step }: PrayerDisplayProps) {
 
     if (s >= decadeStart && s < decadeStart + blockSize * 5) {
       const offset = s - decadeStart;
+      const decade = Math.floor(offset / blockSize);
       const sub = offset % blockSize;
 
       if (sub === 0) {
         return { label: t(prayerLabels.ourFather), text: t(prayers.ourFather) };
       }
       if (sub >= 1 && sub <= 10) {
+        const baseText = t(prayers.hailMaryFull);
+        const meditations = mysteryMeditations[mysterySetId];
+        let text = baseText;
+        if (meditations) {
+          const decadeKey = `decade${decade + 1}` as keyof typeof meditations;
+          const meditationText = t(meditations[decadeKey]);
+          text = insertMeditationText(baseText, l, meditationText);
+        }
         return {
           label: `${t(prayerLabels.hailMary)} (${sub}/10)`,
-          text: t(prayers.hailMaryFull),
+          text,
         };
       }
       if (sub === 11) {
