@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useLanguage } from "../contexts/LanguageContext";
 import type { MysterySetData } from "../types";
 
@@ -15,8 +16,8 @@ export function MysteryCard({
   const { t } = useLanguage();
 
   return (
-    <a
-      href={`/pray/${mysterySet.id}`}
+    <Link
+      to={`/pray/${mysterySet.id}`}
       className="group block rounded-2xl border border-stone-200 bg-white p-5 transition-all hover:shadow-md hover:border-stone-300 active:scale-[0.98]"
     >
       <div className="flex items-start justify-between mb-2">
@@ -37,6 +38,6 @@ export function MysteryCard({
           </span>
         )}
       </div>
-    </a>
+    </Link>
   );
 }
