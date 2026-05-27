@@ -57,6 +57,10 @@ export function PrayPage() {
   // Track if hint has been dismissed
   const hintDismissedRef = useRef(false);
 
+  // Ref to hold latest currentStep for event listeners
+  const currentStepRef = useRef(currentStep);
+  currentStepRef.current = currentStep;
+
   useEffect(() => {
     const timer = setTimeout(() => {
       if (!hintDismissedRef.current) {
@@ -87,41 +91,49 @@ export function PrayPage() {
     [mysterySetId, navigate],
   );
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStartY.current = e.touches[0].clientY;
-  }, []);
+  // Global touch listeners on window — capture swipes anywhere on screen
+  useEffect(() => {
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartY.current = e.touches[0].clientY;
+    };
 
-  const handleTouchEnd = useCallback(
-    (e: React.TouchEvent) => {
+    const onTouchEnd = (e: TouchEvent) => {
       if (touchStartY.current === null) return;
       const deltaY = touchStartY.current - e.changedTouches[0].clientY;
       touchStartY.current = null;
 
       const SWIPE_THRESHOLD = 50;
 
-      if (deltaY > SWIPE_THRESHOLD && currentStep < TOTAL_STEPS - 1) {
-        goToStep(currentStep + 1, "up");
-      } else if (deltaY < -SWIPE_THRESHOLD && currentStep > 0) {
-        goToStep(currentStep - 1, "down");
+      if (deltaY > SWIPE_THRESHOLD && currentStepRef.current < TOTAL_STEPS - 1) {
+        goToStep(currentStepRef.current + 1, "up");
+      } else if (deltaY < -SWIPE_THRESHOLD && currentStepRef.current > 0) {
+        goToStep(currentStepRef.current - 1, "down");
       }
-    },
-    [currentStep, goToStep],
-  );
+    };
 
-  // Also handle wheel/trackpad scroll
-  const handleWheel = useCallback(
-    (e: React.WheelEvent) => {
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
+
+    return () => {
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [goToStep]);
+
+  // Global wheel listener on window — capture trackpad/mouse scroll anywhere
+  useEffect(() => {
+    const onWheel = (e: WheelEvent) => {
       if (wheelCooldownRef.current) return;
 
       const delta = e.deltaY;
       const SCROLL_THRESHOLD = 40;
 
       let navigated = false;
-      if (delta > SCROLL_THRESHOLD && currentStep < TOTAL_STEPS - 1) {
-        goToStep(currentStep + 1, "up");
+      if (delta > SCROLL_THRESHOLD && currentStepRef.current < TOTAL_STEPS - 1) {
+        goToStep(currentStepRef.current + 1, "up");
         navigated = true;
-      } else if (delta < -SCROLL_THRESHOLD && currentStep > 0) {
-        goToStep(currentStep - 1, "down");
+      } else if (delta < -SCROLL_THRESHOLD && currentStepRef.current > 0) {
+        goToStep(currentStepRef.current - 1, "down");
         navigated = true;
       }
 
@@ -131,9 +143,14 @@ export function PrayPage() {
           wheelCooldownRef.current = false;
         }, 400);
       }
-    },
-    [currentStep, goToStep],
-  );
+    };
+
+    window.addEventListener("wheel", onWheel, { passive: true });
+
+    return () => {
+      window.removeEventListener("wheel", onWheel);
+    };
+  }, [goToStep]);
 
   const isFinished = currentStep === TOTAL_STEPS - 1;
 
@@ -176,9 +193,6 @@ export function PrayPage() {
       {/* Swipeable prayer area */}
       <div
         className={`relative min-h-[50vh] select-none no-scrollbar ${exitClass} ${entryClass}`}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        onWheel={handleWheel}
         style={{ transform: "translateY(0)", opacity: 1 }}
       >
         {isFinished ? (
