@@ -6,7 +6,7 @@ export const prayers: Record<string, BilingualText> = {
     en: "In the name of the Father, and of the Son, and of the Holy Spirit. Amen.",
   },
   apostlesCreed: {
-    sk: "Verím v Boha, Otca všemohúceho, Stvoriteľa neba i zeme,i v Ježiša Krista, jeho jediného Syna, nášho Pána,ktorý sa počal z Ducha Svätého, narodil sa z Márie Panny,trpel za vlády Poncia Piláta, bol ukrižovaný, umrel a bol pochovaný;zostúpil k zosnulým, tretieho dňa vstal z mŕtvych,vystúpil na nebesia, sedí po pravici Boha Otca všemohúceho.Odtiaľ príde súdiť živých i mŕtvych.Verím v Ducha Svätého, v svätú Cirkev katolícku, v spoločenstvo svätých,v odpustenie hriechov, vo vzkriesenie tela a v život večný. Amen.",
+    sk: "Verím v Boha, Otca všemohúceho, Stvoriteľa neba i zeme, i v Ježiša Krista, jeho jediného Syna, nášho Pána, ktorý sa počal z Ducha Svätého, narodil sa z Márie Panny, trpel za vlády Poncia Piláta, bol ukrižovaný, umrel a bol pochovaný; zostúpil k zosnulým, tretieho dňa vstal z mŕtvych,vystúpil na nebesia, sedí po pravici Boha Otca všemohúceho. Odtiaľ príde súdiť živých i mŕtvych. Verím v Ducha Svätého, v svätú Cirkev katolícku, v spoločenstvo svätých, v odpustenie hriechov, vo vzkriesenie tela a v život večný. Amen.",
     en: "I believe in God, the Father Almighty, Creator of heaven and earth, and in Jesus Christ, His only Son, our Lord, who was conceived by the Holy Spirit, born of the Virgin Mary, suffered under Pontius Pilate, was crucified, died and was buried; He descended into hell; on the third day He rose again from the dead; He ascended into heaven, and is seated at the right hand of God the Father Almighty; from there He will come to judge the living and the dead. I believe in the Holy Spirit, the Holy Catholic Church, the communion of saints, the forgiveness of sins, the resurrection of the body, and life everlasting. Amen.",
   },
   ourFather: {
@@ -18,7 +18,7 @@ export const prayers: Record<string, BilingualText> = {
     en: "Hail Mary",
   },
   hailMaryFull: {
-    sk: "Zdravas’, Mária, milosti plná, Pán s tebou.Požehnaná si medzi ženami a požehnaný je plod života tvojho, Ježiš.Svätá Mária, Matka Božia, pros za nás hriešnychteraz i v hodinu smrti našej.Amen.",
+    sk: "Zdravas’, Mária, milosti plná, Pán s tebou. Požehnaná si medzi ženami a požehnaný je plod života tvojho, Ježiš.Svätá Mária, Matka Božia, pros za nás hriešnych, teraz i v hodinu smrti našej. Amen.",
     en: "Hail Mary, full of grace, the Lord is with thee; blessed art thou among women, and blessed is the fruit of thy womb, Jesus. Holy Mary, Mother of God, pray for us sinners, now and at the hour of our death. Amen.",
   },
   gloryBe: {
