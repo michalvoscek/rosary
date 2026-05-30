@@ -9,14 +9,15 @@
   --color-rosary-green: #10b981;
 }
 
+html {
+  overscroll-behavior: none;
+}
+
 body {
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-html {
-  scroll-behavior: smooth;
+  overscroll-behavior: none;
 }
 
 /* Swipe animations for prayer transitions */

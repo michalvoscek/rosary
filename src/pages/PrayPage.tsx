@@ -59,7 +59,10 @@ export function PrayPage() {
 
   // Ref to hold latest currentStep for event listeners
   const currentStepRef = useRef(currentStep);
-  currentStepRef.current = currentStep;
+
+  useEffect(() => {
+    currentStepRef.current = currentStep;
+  }, [currentStep]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -97,6 +100,10 @@ export function PrayPage() {
       touchStartY.current = e.touches[0].clientY;
     };
 
+    const onTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+    };
+
     const onTouchEnd = (e: TouchEvent) => {
       if (touchStartY.current === null) return;
       const deltaY = touchStartY.current - e.changedTouches[0].clientY;
@@ -112,10 +119,12 @@ export function PrayPage() {
     };
 
     window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
     window.addEventListener("touchend", onTouchEnd, { passive: true });
 
     return () => {
       window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
     };
   }, [goToStep]);
