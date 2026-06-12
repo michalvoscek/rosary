@@ -21,7 +21,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
           <button
             onClick={toggleLang}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium text-stone-600 hover:text-stone-900 hover:bg-black/10 transition-colors"
             aria-label="Toggle language"
           >
             <Globe size={16} />

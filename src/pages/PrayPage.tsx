@@ -4,12 +4,7 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { getMysterySet } from "../data/mysteries";
 import { PrayerDisplay } from "../components/PrayerDisplay";
 import { ProgressIndicator } from "../components/ProgressIndicator";
-import {
-  RotateCcw,
-  Home,
-  ChevronUp,
-  ChevronDown,
-} from "lucide-react";
+import { RotateCcw, Home, ChevronUp, ChevronDown } from "lucide-react";
 
 const TOTAL_STEPS = 7 + 13 * 5 + 1; // 73
 
@@ -111,7 +106,10 @@ export function PrayPage() {
 
       const SWIPE_THRESHOLD = 50;
 
-      if (deltaY > SWIPE_THRESHOLD && currentStepRef.current < TOTAL_STEPS - 1) {
+      if (
+        deltaY > SWIPE_THRESHOLD &&
+        currentStepRef.current < TOTAL_STEPS - 1
+      ) {
         goToStep(currentStepRef.current + 1, "up");
       } else if (deltaY < -SWIPE_THRESHOLD && currentStepRef.current > 0) {
         goToStep(currentStepRef.current - 1, "down");
@@ -138,7 +136,10 @@ export function PrayPage() {
       const SCROLL_THRESHOLD = 40;
 
       let navigated = false;
-      if (delta > SCROLL_THRESHOLD && currentStepRef.current < TOTAL_STEPS - 1) {
+      if (
+        delta > SCROLL_THRESHOLD &&
+        currentStepRef.current < TOTAL_STEPS - 1
+      ) {
         goToStep(currentStepRef.current + 1, "up");
         navigated = true;
       } else if (delta < -SCROLL_THRESHOLD && currentStepRef.current > 0) {
@@ -206,7 +207,7 @@ export function PrayPage() {
       >
         {isFinished ? (
           <div className="text-center py-12 space-y-6">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-rosary-purple/10 text-rosary-purple">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-black/10 text-black">
               <RotateCcw size={32} />
             </div>
             <h2 className="text-2xl font-bold text-stone-900">
@@ -221,14 +222,14 @@ export function PrayPage() {
             <div className="flex items-center justify-center gap-3">
               <button
                 onClick={() => navigate(`/pray/${mysterySetId}/0`)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-rosary-purple text-white text-sm font-medium hover:bg-rosary-purple/90 transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-black text-white text-sm font-medium transition-colors hover:cursor-pointer"
               >
                 <RotateCcw size={16} />
                 {t({ sk: "Zopakovať", en: "Repeat" })}
               </button>
               <button
                 onClick={() => navigate("/")}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-stone-100 text-stone-700 text-sm font-medium hover:bg-stone-200 transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-rosary-beige-light text-stone-700 text-sm font-medium transition-colors hover:cursor-pointer"
               >
                 <Home size={16} />
                 {t({ sk: "Domov", en: "Home" })}
@@ -264,7 +265,6 @@ export function PrayPage() {
           </div>
         )}
       </div>
-
     </div>
   );
 }
