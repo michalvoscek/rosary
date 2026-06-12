@@ -129,7 +129,7 @@ export function PrayerDisplay({ step, mysterySetId }: PrayerDisplayProps) {
         </span>
       </div>
 
-      <div className="bg-white rounded-2xl border border-stone-200 p-6 sm:p-8">
+      <div className="bg-rosary-beige-light rounded-2xl border border-stone-200 p-6 sm:p-8">
         <p className="text-lg sm:text-xl leading-relaxed text-stone-800 whitespace-pre-wrap text-center">
           {text}
         </p>

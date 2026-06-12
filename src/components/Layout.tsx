@@ -1,17 +1,20 @@
-import { Link } from 'react-router-dom';
-import { useLanguage } from '../contexts/LanguageContext';
-import { Globe, BookOpen } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { Link } from "react-router-dom";
+import { useLanguage } from "../contexts/LanguageContext";
+import { Globe, BookOpen } from "lucide-react";
+import type { ReactNode } from "react";
 
 export function Layout({ children }: { children: ReactNode }) {
   const { lang, toggleLang } = useLanguage();
 
   return (
-    <div className="min-h-screen flex flex-col bg-stone-50 text-stone-800">
+    <div className="min-h-screen flex flex-col bg-rosary-beige text-stone-800">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-stone-200">
+      <header className="sticky top-0 z-50 bg-rosary-beige-light backdrop-blur border-b border-stone-200">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-rosary-purple font-semibold text-lg tracking-tight">
+          <Link
+            to="/"
+            className="flex items-center gap-2 font-semibold text-lg tracking-tight"
+          >
             <BookOpen size={22} />
             <span>Rosary</span>
           </Link>
@@ -22,7 +25,9 @@ export function Layout({ children }: { children: ReactNode }) {
             aria-label="Toggle language"
           >
             <Globe size={16} />
-            <span className="uppercase font-semibold tracking-wide">{lang}</span>
+            <span className="uppercase font-semibold tracking-wide">
+              {lang}
+            </span>
           </button>
         </div>
       </header>
