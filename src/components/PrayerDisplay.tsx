@@ -15,9 +15,9 @@ interface PrayerDisplayProps {
 function buildHailMaryWithMeditation(
   baseText: string,
   lang: string,
-  meditationText: string
+  meditationText: string,
 ): ReactNode {
-  const targetWord = lang === 'sk' ? 'Ježiš' : 'Jesus';
+  const targetWord = lang === "sk" ? "Ježiš" : "Jesus";
   const parts = baseText.split(`${targetWord}.`);
 
   if (parts.length !== 2) {
@@ -27,10 +27,10 @@ function buildHailMaryWithMeditation(
 
   return (
     <>
-      {parts[0]}{targetWord},
-      {'\n'}
-      <strong>{meditationText}</strong>
-      .{parts[1]}
+      {parts[0]}
+      {targetWord},{"\n"}
+      <strong>{meditationText}</strong>.{"\n"}
+      {parts[1]}
     </>
   );
 }
@@ -61,8 +61,10 @@ export function PrayerDisplay({ step, mysterySetId }: PrayerDisplayProps) {
       const meditations = mysteryMeditations[mysterySetId];
       let text: ReactNode = baseText;
       if (meditations) {
-        const startKey = s === 3 ? 'start1' : s === 4 ? 'start2' : 'start3';
-        const meditationText = t(meditations[startKey as keyof typeof meditations]);
+        const startKey = s === 3 ? "start1" : s === 4 ? "start2" : "start3";
+        const meditationText = t(
+          meditations[startKey as keyof typeof meditations],
+        );
         text = buildHailMaryWithMeditation(baseText, l, meditationText);
       }
       return { label: t(prayerLabels.hailMary), text };
