@@ -7,6 +7,9 @@ import { ProgressIndicator } from "../components/ProgressIndicator";
 import { RotateCcw, Home, ChevronUp, ChevronDown } from "lucide-react";
 
 const TOTAL_STEPS = 7 + 13 * 5 + 1; // 73
+const SWIPE_THRESHOLD = 50;
+const DRAG_TRANSITION_MS = 200;
+const SNAP_BACK_MS = 250;
 
 export function PrayPage() {
   const { mysterySetId, step } = useParams<{
@@ -33,9 +36,11 @@ export function PrayPage() {
   });
 
   useEffect(() => {
+    isAnimatingRef.current = true;
     const timer = setTimeout(() => {
       setEntryClass("");
-    }, 350);
+      isAnimatingRef.current = false;
+    }, 400);
     return () => clearTimeout(timer);
   }, []);
 
@@ -44,20 +49,26 @@ export function PrayPage() {
   );
   const [showHint, setShowHint] = useState(true);
 
-  // Swipe detection refs
-  const touchStartY = useRef<number | null>(null);
+  // Drag tracking refs
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dragStartY = useRef<number | null>(null);
+  const isDragging = useRef(false);
   const isAnimatingRef = useRef(false);
   const wheelCooldownRef = useRef(false);
-
-  // Track if hint has been dismissed
-  const hintDismissedRef = useRef(false);
-
-  // Ref to hold latest currentStep for event listeners
+  const touchInProgress = useRef(false);
+  const navigateRef = useRef(navigate);
+  const mysterySetIdRef = useRef(mysterySetId);
   const currentStepRef = useRef(currentStep);
+
+  navigateRef.current = navigate;
+  mysterySetIdRef.current = mysterySetId;
 
   useEffect(() => {
     currentStepRef.current = currentStep;
   }, [currentStep]);
+
+  // Track if hint has been dismissed
+  const hintDismissedRef = useRef(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -68,13 +79,236 @@ export function PrayPage() {
     return () => clearTimeout(timer);
   }, []);
 
+  // --- DOM helpers (operate directly on containerRef for zero-lag feedback) ---
+
+  const setTr = (y: number, opacity: number) => {
+    const el = containerRef.current;
+    if (!el) return;
+    el.style.transform = `translateY(${y}px)`;
+    el.style.opacity = String(opacity);
+  };
+
+  const setTransition = (ms: number) => {
+    const el = containerRef.current;
+    if (!el) return;
+    el.style.transition = `transform ${ms}ms cubic-bezier(0.22, 1, 0.36, 1), opacity ${ms}ms ease`;
+  };
+
+  const removeTransition = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    el.style.transition = "";
+  };
+
+  const resetPosition = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    el.style.transform = "translateY(0)";
+    el.style.opacity = "1";
+  };
+
+
+  // --- Touch handlers ---
+
+  useEffect(() => {
+    const onTouchStart = (e: TouchEvent) => {
+      if (isAnimatingRef.current || isDragging.current) return;
+      dragStartY.current = e.touches[0].clientY;
+      isDragging.current = true;
+      touchInProgress.current = true;
+      removeTransition();
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!isDragging.current || dragStartY.current === null) return;
+      e.preventDefault();
+      const deltaY = e.touches[0].clientY - dragStartY.current;
+      const canGoUp = currentStepRef.current < TOTAL_STEPS - 1;
+      const canGoDown = currentStepRef.current > 0;
+
+      let translateY = deltaY;
+      if ((deltaY < 0 && !canGoUp) || (deltaY > 0 && !canGoDown)) {
+        translateY = deltaY * 0.25;
+      }
+
+      const opacity = Math.max(0.3, 1 - Math.abs(deltaY) / 300);
+      setTr(translateY, opacity);
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (!isDragging.current || dragStartY.current === null) return;
+      const deltaY = e.changedTouches[0].clientY - dragStartY.current;
+      dragStartY.current = null;
+      isDragging.current = false;
+
+      const canGoUp = currentStepRef.current < TOTAL_STEPS - 1;
+      const canGoDown = currentStepRef.current > 0;
+
+      const finish = () => {
+        touchInProgress.current = false;
+        isAnimatingRef.current = false;
+      };
+
+      if (deltaY < -SWIPE_THRESHOLD && canGoUp) {
+        isAnimatingRef.current = true;
+        setTransition(DRAG_TRANSITION_MS);
+        setTr(-250, 0);
+        setTimeout(() => {
+          if (!hintDismissedRef.current) {
+            hintDismissedRef.current = true;
+            setShowHint(false);
+          }
+          removeTransition();
+          resetPosition();
+          navigateRef.current(
+            `/pray/${mysterySetIdRef.current}/${currentStepRef.current + 1}`,
+            { state: { direction: "up" } },
+          );
+          finish();
+        }, DRAG_TRANSITION_MS + 20);
+      } else if (deltaY > SWIPE_THRESHOLD && canGoDown) {
+        isAnimatingRef.current = true;
+        setTransition(DRAG_TRANSITION_MS);
+        setTr(250, 0);
+        setTimeout(() => {
+          if (!hintDismissedRef.current) {
+            hintDismissedRef.current = true;
+            setShowHint(false);
+          }
+          removeTransition();
+          resetPosition();
+          navigateRef.current(
+            `/pray/${mysterySetIdRef.current}/${currentStepRef.current - 1}`,
+            { state: { direction: "down" } },
+          );
+          finish();
+        }, DRAG_TRANSITION_MS + 20);
+      } else {
+        isAnimatingRef.current = true;
+        setTransition(SNAP_BACK_MS);
+        resetPosition();
+        setTimeout(() => {
+          removeTransition();
+          finish();
+        }, SNAP_BACK_MS + 20);
+      }
+    };
+
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
+
+    return () => {
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
+    };
+  }, []);
+
+  // --- Mouse drag handlers (desktop) ---
+
+  useEffect(() => {
+    const onMouseDown = (e: MouseEvent) => {
+      if (touchInProgress.current) return;
+      if (e.button !== 0) return;
+      if (isAnimatingRef.current || isDragging.current) return;
+      dragStartY.current = e.clientY;
+      isDragging.current = true;
+      removeTransition();
+    };
+
+    const onMouseMove = (e: MouseEvent) => {
+      if (!isDragging.current || dragStartY.current === null) return;
+      const deltaY = e.clientY - dragStartY.current;
+      const canGoUp = currentStepRef.current < TOTAL_STEPS - 1;
+      const canGoDown = currentStepRef.current > 0;
+
+      let translateY = deltaY;
+      if ((deltaY < 0 && !canGoUp) || (deltaY > 0 && !canGoDown)) {
+        translateY = deltaY * 0.25;
+      }
+
+      const opacity = Math.max(0.3, 1 - Math.abs(deltaY) / 300);
+      setTr(translateY, opacity);
+    };
+
+    const onMouseUp = (e: MouseEvent) => {
+      if (!isDragging.current || dragStartY.current === null) return;
+      const deltaY = e.clientY - dragStartY.current;
+      dragStartY.current = null;
+      isDragging.current = false;
+
+      const canGoUp = currentStepRef.current < TOTAL_STEPS - 1;
+      const canGoDown = currentStepRef.current > 0;
+
+      const finish = () => {
+        isAnimatingRef.current = false;
+      };
+
+      if (deltaY < -SWIPE_THRESHOLD && canGoUp) {
+        isAnimatingRef.current = true;
+        setTransition(DRAG_TRANSITION_MS);
+        setTr(-250, 0);
+        setTimeout(() => {
+          if (!hintDismissedRef.current) {
+            hintDismissedRef.current = true;
+            setShowHint(false);
+          }
+          removeTransition();
+          resetPosition();
+          navigateRef.current(
+            `/pray/${mysterySetIdRef.current}/${currentStepRef.current + 1}`,
+            { state: { direction: "up" } },
+          );
+          finish();
+        }, DRAG_TRANSITION_MS + 20);
+      } else if (deltaY > SWIPE_THRESHOLD && canGoDown) {
+        isAnimatingRef.current = true;
+        setTransition(DRAG_TRANSITION_MS);
+        setTr(250, 0);
+        setTimeout(() => {
+          if (!hintDismissedRef.current) {
+            hintDismissedRef.current = true;
+            setShowHint(false);
+          }
+          removeTransition();
+          resetPosition();
+          navigateRef.current(
+            `/pray/${mysterySetIdRef.current}/${currentStepRef.current - 1}`,
+            { state: { direction: "down" } },
+          );
+          finish();
+        }, DRAG_TRANSITION_MS + 20);
+      } else {
+        isAnimatingRef.current = true;
+        setTransition(SNAP_BACK_MS);
+        resetPosition();
+        setTimeout(() => {
+          removeTransition();
+          finish();
+        }, SNAP_BACK_MS + 20);
+      }
+    };
+
+    window.addEventListener("mousedown", onMouseDown);
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+
+    return () => {
+      window.removeEventListener("mousedown", onMouseDown);
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, []);
+
+  // --- Wheel listener ---
+
   const goToStep = useCallback(
     (s: number, direction: "up" | "down") => {
       if (isAnimatingRef.current) return;
       isAnimatingRef.current = true;
       setExitDirection(direction);
 
-      // Dismiss hint on first interaction
       if (!hintDismissedRef.current) {
         hintDismissedRef.current = true;
         setShowHint(false);
@@ -89,45 +323,6 @@ export function PrayPage() {
     [mysterySetId, navigate],
   );
 
-  // Global touch listeners on window — capture swipes anywhere on screen
-  useEffect(() => {
-    const onTouchStart = (e: TouchEvent) => {
-      touchStartY.current = e.touches[0].clientY;
-    };
-
-    const onTouchMove = (e: TouchEvent) => {
-      e.preventDefault();
-    };
-
-    const onTouchEnd = (e: TouchEvent) => {
-      if (touchStartY.current === null) return;
-      const deltaY = touchStartY.current - e.changedTouches[0].clientY;
-      touchStartY.current = null;
-
-      const SWIPE_THRESHOLD = 50;
-
-      if (
-        deltaY > SWIPE_THRESHOLD &&
-        currentStepRef.current < TOTAL_STEPS - 1
-      ) {
-        goToStep(currentStepRef.current + 1, "up");
-      } else if (deltaY < -SWIPE_THRESHOLD && currentStepRef.current > 0) {
-        goToStep(currentStepRef.current - 1, "down");
-      }
-    };
-
-    window.addEventListener("touchstart", onTouchStart, { passive: true });
-    window.addEventListener("touchmove", onTouchMove, { passive: false });
-    window.addEventListener("touchend", onTouchEnd, { passive: true });
-
-    return () => {
-      window.removeEventListener("touchstart", onTouchStart);
-      window.removeEventListener("touchmove", onTouchMove);
-      window.removeEventListener("touchend", onTouchEnd);
-    };
-  }, [goToStep]);
-
-  // Global wheel listener on window — capture trackpad/mouse scroll anywhere
   useEffect(() => {
     const onWheel = (e: WheelEvent) => {
       if (wheelCooldownRef.current) return;
@@ -162,9 +357,10 @@ export function PrayPage() {
     };
   }, [goToStep]);
 
+  // --- Render ---
+
   const isFinished = currentStep === TOTAL_STEPS - 1;
 
-  // Exit animation class
   const exitClass =
     exitDirection === "up"
       ? "animate-slide-up-out"
@@ -202,6 +398,7 @@ export function PrayPage() {
 
       {/* Swipeable prayer area */}
       <div
+        ref={containerRef}
         className={`relative min-h-[50vh] select-none no-scrollbar ${exitClass} ${entryClass}`}
         style={{ transform: "translateY(0)", opacity: 1 }}
       >
