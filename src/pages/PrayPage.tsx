@@ -130,9 +130,9 @@ export function PrayPage() {
 
     const speed = Math.max(Math.abs(velocity), MIN_THROW_SPEED);
 
-    const offScreenDist = Math.max(window.innerHeight * 0.8, 400);
+    const offScreenDist = 250;
     const targetY = fromY + direction * offScreenDist;
-    const duration = Math.min(700, Math.max(100, offScreenDist / speed));
+    const duration = Math.min(250, Math.max(80, offScreenDist / speed));
 
     el.style.transform = `translateY(${fromY}px)`;
     el.style.opacity = String(fromOpacity);
