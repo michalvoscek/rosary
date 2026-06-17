@@ -8,8 +8,9 @@ import { RotateCcw, Home, ChevronUp, ChevronDown } from "lucide-react";
 
 const TOTAL_STEPS = 7 + 13 * 5 + 1; // 73
 const SWIPE_THRESHOLD = 50;
-const DRAG_TRANSITION_MS = 200;
 const SNAP_BACK_MS = 250;
+const VELOCITY_SAMPLE_WINDOW_MS = 100;
+const MIN_THROW_SPEED = 0.3; // px/ms minimum exit speed
 
 export function PrayPage() {
   const { mysterySetId, step } = useParams<{
@@ -56,6 +57,7 @@ export function PrayPage() {
   const isAnimatingRef = useRef(false);
   const wheelCooldownRef = useRef(false);
   const touchInProgress = useRef(false);
+  const velocitySamples = useRef<{ y: number; t: number }[]>([]);
   const navigateRef = useRef(navigate);
   const mysterySetIdRef = useRef(mysterySetId);
   const currentStepRef = useRef(currentStep);
@@ -107,6 +109,50 @@ export function PrayPage() {
     el.style.opacity = "1";
   };
 
+  const computeVelocity = () => {
+    const s = velocitySamples.current;
+    if (s.length < 2) return 0;
+    const first = s[0];
+    const last = s[s.length - 1];
+    const dt = last.t - first.t;
+    return dt > 0 ? (last.y - first.y) / dt : 0;
+  };
+
+  const throwAnimate = (
+    fromY: number,
+    velocity: number,
+    direction: -1 | 1,
+    fromOpacity: number,
+    onComplete: () => void,
+  ) => {
+    const el = containerRef.current;
+    if (!el) return onComplete();
+
+    const speed = Math.max(Math.abs(velocity), MIN_THROW_SPEED);
+
+    const offScreenDist = Math.max(window.innerHeight * 0.8, 400);
+    const targetY = fromY + direction * offScreenDist;
+    const duration = Math.min(700, Math.max(100, offScreenDist / speed));
+
+    el.style.transform = `translateY(${fromY}px)`;
+    el.style.opacity = String(fromOpacity);
+
+    const start = performance.now();
+    const tick = (now: number) => {
+      const t = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - t, 3);
+      const y = fromY + (targetY - fromY) * ease;
+      const opacity = fromOpacity * (1 - ease);
+      setTr(y, Math.max(0, opacity));
+      if (t < 1) {
+        requestAnimationFrame(tick);
+      } else {
+        onComplete();
+      }
+    };
+    requestAnimationFrame(tick);
+  };
+
 
   // --- Touch handlers ---
 
@@ -116,6 +162,7 @@ export function PrayPage() {
       dragStartY.current = e.touches[0].clientY;
       isDragging.current = true;
       touchInProgress.current = true;
+      velocitySamples.current = [];
       removeTransition();
     };
 
@@ -131,6 +178,12 @@ export function PrayPage() {
         translateY = deltaY * 0.25;
       }
 
+      const now = performance.now();
+      velocitySamples.current.push({ y: e.touches[0].clientY, t: now });
+      velocitySamples.current = velocitySamples.current.filter(
+        (s) => now - s.t < VELOCITY_SAMPLE_WINDOW_MS,
+      );
+
       const opacity = Math.max(0.3, 1 - Math.abs(deltaY) / 300);
       setTr(translateY, opacity);
     };
@@ -138,8 +191,10 @@ export function PrayPage() {
     const onTouchEnd = (e: TouchEvent) => {
       if (!isDragging.current || dragStartY.current === null) return;
       const deltaY = e.changedTouches[0].clientY - dragStartY.current;
+      const velocity = computeVelocity();
       dragStartY.current = null;
       isDragging.current = false;
+      velocitySamples.current = [];
 
       const canGoUp = currentStepRef.current < TOTAL_STEPS - 1;
       const canGoDown = currentStepRef.current > 0;
@@ -151,9 +206,9 @@ export function PrayPage() {
 
       if (deltaY < -SWIPE_THRESHOLD && canGoUp) {
         isAnimatingRef.current = true;
-        setTransition(DRAG_TRANSITION_MS);
-        setTr(-250, 0);
-        setTimeout(() => {
+        const startY = deltaY;
+        const startOpacity = Math.max(0.3, 1 - Math.abs(deltaY) / 300);
+        throwAnimate(startY, velocity, -1, startOpacity, () => {
           if (!hintDismissedRef.current) {
             hintDismissedRef.current = true;
             setShowHint(false);
@@ -165,12 +220,12 @@ export function PrayPage() {
             { state: { direction: "up" } },
           );
           finish();
-        }, DRAG_TRANSITION_MS + 20);
+        });
       } else if (deltaY > SWIPE_THRESHOLD && canGoDown) {
         isAnimatingRef.current = true;
-        setTransition(DRAG_TRANSITION_MS);
-        setTr(250, 0);
-        setTimeout(() => {
+        const startY = deltaY;
+        const startOpacity = Math.max(0.3, 1 - Math.abs(deltaY) / 300);
+        throwAnimate(startY, velocity, 1, startOpacity, () => {
           if (!hintDismissedRef.current) {
             hintDismissedRef.current = true;
             setShowHint(false);
@@ -182,7 +237,7 @@ export function PrayPage() {
             { state: { direction: "down" } },
           );
           finish();
-        }, DRAG_TRANSITION_MS + 20);
+        });
       } else {
         isAnimatingRef.current = true;
         setTransition(SNAP_BACK_MS);
@@ -214,6 +269,7 @@ export function PrayPage() {
       if (isAnimatingRef.current || isDragging.current) return;
       dragStartY.current = e.clientY;
       isDragging.current = true;
+      velocitySamples.current = [];
       removeTransition();
     };
 
@@ -228,6 +284,12 @@ export function PrayPage() {
         translateY = deltaY * 0.25;
       }
 
+      const now = performance.now();
+      velocitySamples.current.push({ y: e.clientY, t: now });
+      velocitySamples.current = velocitySamples.current.filter(
+        (s) => now - s.t < VELOCITY_SAMPLE_WINDOW_MS,
+      );
+
       const opacity = Math.max(0.3, 1 - Math.abs(deltaY) / 300);
       setTr(translateY, opacity);
     };
@@ -235,8 +297,10 @@ export function PrayPage() {
     const onMouseUp = (e: MouseEvent) => {
       if (!isDragging.current || dragStartY.current === null) return;
       const deltaY = e.clientY - dragStartY.current;
+      const velocity = computeVelocity();
       dragStartY.current = null;
       isDragging.current = false;
+      velocitySamples.current = [];
 
       const canGoUp = currentStepRef.current < TOTAL_STEPS - 1;
       const canGoDown = currentStepRef.current > 0;
@@ -247,9 +311,9 @@ export function PrayPage() {
 
       if (deltaY < -SWIPE_THRESHOLD && canGoUp) {
         isAnimatingRef.current = true;
-        setTransition(DRAG_TRANSITION_MS);
-        setTr(-250, 0);
-        setTimeout(() => {
+        const startY = deltaY;
+        const startOpacity = Math.max(0.3, 1 - Math.abs(deltaY) / 300);
+        throwAnimate(startY, velocity, -1, startOpacity, () => {
           if (!hintDismissedRef.current) {
             hintDismissedRef.current = true;
             setShowHint(false);
@@ -261,12 +325,12 @@ export function PrayPage() {
             { state: { direction: "up" } },
           );
           finish();
-        }, DRAG_TRANSITION_MS + 20);
+        });
       } else if (deltaY > SWIPE_THRESHOLD && canGoDown) {
         isAnimatingRef.current = true;
-        setTransition(DRAG_TRANSITION_MS);
-        setTr(250, 0);
-        setTimeout(() => {
+        const startY = deltaY;
+        const startOpacity = Math.max(0.3, 1 - Math.abs(deltaY) / 300);
+        throwAnimate(startY, velocity, 1, startOpacity, () => {
           if (!hintDismissedRef.current) {
             hintDismissedRef.current = true;
             setShowHint(false);
@@ -278,7 +342,7 @@ export function PrayPage() {
             { state: { direction: "down" } },
           );
           finish();
-        }, DRAG_TRANSITION_MS + 20);
+        });
       } else {
         isAnimatingRef.current = true;
         setTransition(SNAP_BACK_MS);
@@ -399,8 +463,7 @@ export function PrayPage() {
       {/* Swipeable prayer area */}
       <div
         ref={containerRef}
-        className={`relative min-h-[50vh] select-none no-scrollbar ${exitClass} ${entryClass}`}
-        style={{ transform: "translateY(0)", opacity: 1 }}
+        className={`relative min-h-[50vh] select-none touch-none no-scrollbar ${exitClass} ${entryClass}`}
       >
         {isFinished ? (
           <div className="text-center py-12 space-y-6">
