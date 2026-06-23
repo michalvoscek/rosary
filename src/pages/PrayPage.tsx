@@ -11,6 +11,7 @@ const SWIPE_THRESHOLD = 50;
 const SNAP_BACK_MS = 250;
 const VELOCITY_SAMPLE_WINDOW_MS = 100;
 const MIN_THROW_SPEED = 0.3; // px/ms minimum exit speed
+const MAX_SWIPE_FOLLOW_SPEED_PX_PER_MS = 0.5; // px/ms cap: element won't follow finger faster than this so the swipe animation stays visible
 
 export function PrayPage() {
   const { mysterySetId, step } = useParams<{
@@ -58,6 +59,8 @@ export function PrayPage() {
   const wheelCooldownRef = useRef(false);
   const touchInProgress = useRef(false);
   const velocitySamples = useRef<{ y: number; t: number }[]>([]);
+  const lastAppliedYRef = useRef(0);
+  const lastMoveTimeRef = useRef(0);
   const navigateRef = useRef(navigate);
   const mysterySetIdRef = useRef(mysterySetId);
   const currentStepRef = useRef(currentStep);
@@ -118,6 +121,26 @@ export function PrayPage() {
     return dt > 0 ? (last.y - first.y) / dt : 0;
   };
 
+  const applyCappedTranslate = (desiredY: number, now: number) => {
+    const dt = now - lastMoveTimeRef.current;
+    lastMoveTimeRef.current = now;
+    let appliedY: number;
+    if (dt > 0) {
+      const maxStep = MAX_SWIPE_FOLLOW_SPEED_PX_PER_MS * dt;
+      const diff = desiredY - lastAppliedYRef.current;
+      if (Math.abs(diff) > maxStep) {
+        appliedY = lastAppliedYRef.current + Math.sign(diff) * maxStep;
+      } else {
+        appliedY = desiredY;
+      }
+    } else {
+      appliedY = desiredY;
+    }
+    lastAppliedYRef.current = appliedY;
+    const opacity = Math.max(0.3, 1 - Math.abs(appliedY) / 300);
+    setTr(appliedY, opacity);
+  };
+
   const throwAnimate = (
     fromY: number,
     velocity: number,
@@ -163,6 +186,8 @@ export function PrayPage() {
       isDragging.current = true;
       touchInProgress.current = true;
       velocitySamples.current = [];
+      lastAppliedYRef.current = 0;
+      lastMoveTimeRef.current = performance.now();
       removeTransition();
     };
 
@@ -173,9 +198,9 @@ export function PrayPage() {
       const canGoUp = currentStepRef.current < TOTAL_STEPS - 1;
       const canGoDown = currentStepRef.current > 0;
 
-      let translateY = deltaY;
+      let desiredY = deltaY;
       if ((deltaY < 0 && !canGoUp) || (deltaY > 0 && !canGoDown)) {
-        translateY = deltaY * 0.25;
+        desiredY = deltaY * 0.25;
       }
 
       const now = performance.now();
@@ -184,14 +209,14 @@ export function PrayPage() {
         (s) => now - s.t < VELOCITY_SAMPLE_WINDOW_MS,
       );
 
-      const opacity = Math.max(0.3, 1 - Math.abs(deltaY) / 300);
-      setTr(translateY, opacity);
+      applyCappedTranslate(desiredY, now);
     };
 
     const onTouchEnd = (e: TouchEvent) => {
       if (!isDragging.current || dragStartY.current === null) return;
       const deltaY = e.changedTouches[0].clientY - dragStartY.current;
       const velocity = computeVelocity();
+      const appliedY = lastAppliedYRef.current;
       dragStartY.current = null;
       isDragging.current = false;
       velocitySamples.current = [];
@@ -206,8 +231,8 @@ export function PrayPage() {
 
       if (deltaY < -SWIPE_THRESHOLD && canGoUp) {
         isAnimatingRef.current = true;
-        const startY = deltaY;
-        const startOpacity = Math.max(0.3, 1 - Math.abs(deltaY) / 300);
+        const startY = appliedY;
+        const startOpacity = Math.max(0.3, 1 - Math.abs(appliedY) / 300);
         throwAnimate(startY, velocity, -1, startOpacity, () => {
           if (!hintDismissedRef.current) {
             hintDismissedRef.current = true;
@@ -223,8 +248,8 @@ export function PrayPage() {
         });
       } else if (deltaY > SWIPE_THRESHOLD && canGoDown) {
         isAnimatingRef.current = true;
-        const startY = deltaY;
-        const startOpacity = Math.max(0.3, 1 - Math.abs(deltaY) / 300);
+        const startY = appliedY;
+        const startOpacity = Math.max(0.3, 1 - Math.abs(appliedY) / 300);
         throwAnimate(startY, velocity, 1, startOpacity, () => {
           if (!hintDismissedRef.current) {
             hintDismissedRef.current = true;
@@ -270,6 +295,8 @@ export function PrayPage() {
       dragStartY.current = e.clientY;
       isDragging.current = true;
       velocitySamples.current = [];
+      lastAppliedYRef.current = 0;
+      lastMoveTimeRef.current = performance.now();
       removeTransition();
     };
 
@@ -279,9 +306,9 @@ export function PrayPage() {
       const canGoUp = currentStepRef.current < TOTAL_STEPS - 1;
       const canGoDown = currentStepRef.current > 0;
 
-      let translateY = deltaY;
+      let desiredY = deltaY;
       if ((deltaY < 0 && !canGoUp) || (deltaY > 0 && !canGoDown)) {
-        translateY = deltaY * 0.25;
+        desiredY = deltaY * 0.25;
       }
 
       const now = performance.now();
@@ -290,14 +317,14 @@ export function PrayPage() {
         (s) => now - s.t < VELOCITY_SAMPLE_WINDOW_MS,
       );
 
-      const opacity = Math.max(0.3, 1 - Math.abs(deltaY) / 300);
-      setTr(translateY, opacity);
+      applyCappedTranslate(desiredY, now);
     };
 
     const onMouseUp = (e: MouseEvent) => {
       if (!isDragging.current || dragStartY.current === null) return;
       const deltaY = e.clientY - dragStartY.current;
       const velocity = computeVelocity();
+      const appliedY = lastAppliedYRef.current;
       dragStartY.current = null;
       isDragging.current = false;
       velocitySamples.current = [];
@@ -311,8 +338,8 @@ export function PrayPage() {
 
       if (deltaY < -SWIPE_THRESHOLD && canGoUp) {
         isAnimatingRef.current = true;
-        const startY = deltaY;
-        const startOpacity = Math.max(0.3, 1 - Math.abs(deltaY) / 300);
+        const startY = appliedY;
+        const startOpacity = Math.max(0.3, 1 - Math.abs(appliedY) / 300);
         throwAnimate(startY, velocity, -1, startOpacity, () => {
           if (!hintDismissedRef.current) {
             hintDismissedRef.current = true;
@@ -328,8 +355,8 @@ export function PrayPage() {
         });
       } else if (deltaY > SWIPE_THRESHOLD && canGoDown) {
         isAnimatingRef.current = true;
-        const startY = deltaY;
-        const startOpacity = Math.max(0.3, 1 - Math.abs(deltaY) / 300);
+        const startY = appliedY;
+        const startOpacity = Math.max(0.3, 1 - Math.abs(appliedY) / 300);
         throwAnimate(startY, velocity, 1, startOpacity, () => {
           if (!hintDismissedRef.current) {
             hintDismissedRef.current = true;
