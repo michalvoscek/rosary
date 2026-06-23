@@ -4,7 +4,7 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { getMysterySet } from "../data/mysteries";
 import { PrayerDisplay } from "../components/PrayerDisplay";
 import { ProgressIndicator } from "../components/ProgressIndicator";
-import { RotateCcw, Home, ChevronUp, ChevronDown } from "lucide-react";
+import { Check, Home, ChevronUp, ChevronDown } from "lucide-react";
 
 const TOTAL_STEPS = 7 + 13 * 5 + 1; // 73
 const SWIPE_THRESHOLD = 50;
@@ -195,7 +195,8 @@ export function PrayPage() {
       if (!isDragging.current || dragStartY.current === null) return;
       e.preventDefault();
       const deltaY = e.touches[0].clientY - dragStartY.current;
-      const canGoUp = currentStepRef.current < TOTAL_STEPS - 1;
+      const isFinishedStep = currentStepRef.current === TOTAL_STEPS - 1;
+      const canGoUp = currentStepRef.current < TOTAL_STEPS - 1 || isFinishedStep;
       const canGoDown = currentStepRef.current > 0;
 
       let desiredY = deltaY;
@@ -221,7 +222,8 @@ export function PrayPage() {
       isDragging.current = false;
       velocitySamples.current = [];
 
-      const canGoUp = currentStepRef.current < TOTAL_STEPS - 1;
+      const isFinishedStep = currentStepRef.current === TOTAL_STEPS - 1;
+      const canGoUp = currentStepRef.current < TOTAL_STEPS - 1 || isFinishedStep;
       const canGoDown = currentStepRef.current > 0;
 
       const finish = () => {
@@ -240,10 +242,14 @@ export function PrayPage() {
           }
           removeTransition();
           resetPosition();
-          navigateRef.current(
-            `/pray/${mysterySetIdRef.current}/${currentStepRef.current + 1}`,
-            { state: { direction: "up" } },
-          );
+          if (isFinishedStep) {
+            navigateRef.current("/", { state: { direction: "up" } });
+          } else {
+            navigateRef.current(
+              `/pray/${mysterySetIdRef.current}/${currentStepRef.current + 1}`,
+              { state: { direction: "up" } },
+            );
+          }
           finish();
         });
       } else if (deltaY > SWIPE_THRESHOLD && canGoDown) {
@@ -303,7 +309,8 @@ export function PrayPage() {
     const onMouseMove = (e: MouseEvent) => {
       if (!isDragging.current || dragStartY.current === null) return;
       const deltaY = e.clientY - dragStartY.current;
-      const canGoUp = currentStepRef.current < TOTAL_STEPS - 1;
+      const isFinishedStep = currentStepRef.current === TOTAL_STEPS - 1;
+      const canGoUp = currentStepRef.current < TOTAL_STEPS - 1 || isFinishedStep;
       const canGoDown = currentStepRef.current > 0;
 
       let desiredY = deltaY;
@@ -329,7 +336,8 @@ export function PrayPage() {
       isDragging.current = false;
       velocitySamples.current = [];
 
-      const canGoUp = currentStepRef.current < TOTAL_STEPS - 1;
+      const isFinishedStep = currentStepRef.current === TOTAL_STEPS - 1;
+      const canGoUp = currentStepRef.current < TOTAL_STEPS - 1 || isFinishedStep;
       const canGoDown = currentStepRef.current > 0;
 
       const finish = () => {
@@ -347,10 +355,14 @@ export function PrayPage() {
           }
           removeTransition();
           resetPosition();
-          navigateRef.current(
-            `/pray/${mysterySetIdRef.current}/${currentStepRef.current + 1}`,
-            { state: { direction: "up" } },
-          );
+          if (isFinishedStep) {
+            navigateRef.current("/", { state: { direction: "up" } });
+          } else {
+            navigateRef.current(
+              `/pray/${mysterySetIdRef.current}/${currentStepRef.current + 1}`,
+              { state: { direction: "up" } },
+            );
+          }
           finish();
         });
       } else if (deltaY > SWIPE_THRESHOLD && canGoDown) {
@@ -414,6 +426,26 @@ export function PrayPage() {
     [mysterySetId, navigate],
   );
 
+  const goToHome = useCallback(
+    (direction: "up" | "down") => {
+      if (isAnimatingRef.current) return;
+      isAnimatingRef.current = true;
+      setExitDirection(direction);
+
+      if (!hintDismissedRef.current) {
+        hintDismissedRef.current = true;
+        setShowHint(false);
+      }
+
+      setTimeout(() => {
+        navigate("/", { state: { direction } });
+        isAnimatingRef.current = false;
+        setExitDirection(null);
+      }, 250);
+    },
+    [navigate],
+  );
+
   useEffect(() => {
     const onWheel = (e: WheelEvent) => {
       if (wheelCooldownRef.current) return;
@@ -427,6 +459,12 @@ export function PrayPage() {
         currentStepRef.current < TOTAL_STEPS - 1
       ) {
         goToStep(currentStepRef.current + 1, "up");
+        navigated = true;
+      } else if (
+        delta > SCROLL_THRESHOLD &&
+        currentStepRef.current === TOTAL_STEPS - 1
+      ) {
+        goToHome("up");
         navigated = true;
       } else if (delta < -SCROLL_THRESHOLD && currentStepRef.current > 0) {
         goToStep(currentStepRef.current - 1, "down");
@@ -446,7 +484,7 @@ export function PrayPage() {
     return () => {
       window.removeEventListener("wheel", onWheel);
     };
-  }, [goToStep]);
+  }, [goToStep, goToHome]);
 
   // --- Render ---
 
@@ -493,35 +531,21 @@ export function PrayPage() {
         className={`relative min-h-[50vh] select-none touch-none no-scrollbar ${exitClass} ${entryClass}`}
       >
         {isFinished ? (
-          <div className="text-center py-12 space-y-6">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-black/10 text-black">
-              <RotateCcw size={32} />
+          <div className="bg-rosary-beige-light rounded-2xl border border-stone-200 p-6 sm:p-8 space-y-4">
+            <div className="flex justify-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-black/10 text-black">
+                <Check size={28} />
+              </div>
             </div>
-            <h2 className="text-2xl font-bold text-stone-900">
+            <h2 className="text-2xl font-bold text-stone-900 text-center">
               {t({ sk: "Ruženec dokončený", en: "Rosary completed" })}
             </h2>
-            <p className="text-stone-600 max-w-sm mx-auto">
+            <p className="text-lg leading-relaxed text-stone-800 whitespace-pre-wrap text-center">
               {t({
                 sk: "Ďakujeme za spoločnú modlitbu. Nech vás Panna Mária ochraňuje.",
                 en: "Thank you for praying with us. May the Virgin Mary protect you.",
               })}
             </p>
-            <div className="flex items-center justify-center gap-3">
-              <button
-                onClick={() => navigate(`/pray/${mysterySetId}/0`)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-black text-white text-sm font-medium transition-colors hover:cursor-pointer"
-              >
-                <RotateCcw size={16} />
-                {t({ sk: "Zopakovať", en: "Repeat" })}
-              </button>
-              <button
-                onClick={() => navigate("/")}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-rosary-beige-light text-stone-700 text-sm font-medium transition-colors hover:cursor-pointer"
-              >
-                <Home size={16} />
-                {t({ sk: "Domov", en: "Home" })}
-              </button>
-            </div>
           </div>
         ) : (
           <PrayerDisplay
