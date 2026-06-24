@@ -63,3 +63,13 @@ const currentDecade = Math.max(0, Math.min(4, Math.floor((step - 7) / 13)));
 
 Within a decade, Hail Mary steps show the count:  
 **"Zdravas Mária (1/10)"** through **"Zdravas Mária (10/10)"**
+
+## Switching cards
+
+Every prayer is inside card. Moving to next the card can be done by swiping up or down on mobile devices. When user swipes, card should follow his finger. After releasing card, if:
+ - threshold was not crossed: card should move back to its original position
+ - threshold was crossed: card should move at constant speed in direction that threshold was crossed causing switch. Swipe up brings next card. Swipe down brings previous card.
+Speed of card after release is constant called SPEED_AFTER_RELEASE defined in pixels per second in code
+On the desktop it is sufficient to use single scroll step to swap card. But multiple scrolls in row are grouped into single switch animation. The speed of the card after scroll is also defined by the SPEED_AFTER_RELEASE constant. Scroll down goes to next card and scroll up to previous card.
+During animation the next card should be comming from bottom at constant distance from the previous, and previous card should come from top also at constant distance from outgoing card. Speed of incoming card should always equal to the speed of the original card.
+Top of incomming card should be at "scrolling area height" distance from top of outgoing car
