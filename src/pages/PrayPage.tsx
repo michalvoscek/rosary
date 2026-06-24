@@ -1,5 +1,11 @@
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useLayoutEffect,
+} from "react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { getMysterySet } from "../data/mysteries";
 import { PrayerDisplay } from "../components/PrayerDisplay";
@@ -7,11 +13,54 @@ import { ProgressIndicator } from "../components/ProgressIndicator";
 import { Check, Home, ChevronUp, ChevronDown } from "lucide-react";
 
 const TOTAL_STEPS = 7 + 13 * 5 + 1; // 73
-const SWIPE_THRESHOLD = 50;
-const SNAP_BACK_MS = 250;
-const VELOCITY_SAMPLE_WINDOW_MS = 100;
-const MIN_THROW_SPEED = 0.3; // px/ms minimum exit speed
-const MAX_SWIPE_FOLLOW_SPEED_PX_PER_MS = 0.5; // px/ms cap: element won't follow finger faster than this so the swipe animation stays visible
+const SWIPE_THRESHOLD = 60; // px
+const SPEED_AFTER_RELEASE = 900; // px/s
+const WHEEL_THRESHOLD = 40; // px
+const WHEEL_GROUP_MS = 120; // ms
+const SNAP_BACK_DURATION_MS = 250;
+
+type StepOrFinished = number | "finished";
+
+interface CardContentProps {
+  step: StepOrFinished;
+  mysterySetId: string;
+  mysterySet: NonNullable<ReturnType<typeof getMysterySet>>;
+}
+
+function CardContent({ step, mysterySetId, mysterySet }: CardContentProps) {
+  const { t } = useLanguage();
+
+  if (step === "finished") {
+    return (
+      <div className="bg-rosary-beige-light rounded-2xl border border-stone-200 p-6 sm:p-8 flex flex-col items-center justify-center gap-4 text-center">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-black/10 text-black">
+          <Check size={28} />
+        </div>
+        <h2 className="text-2xl font-bold text-stone-900">
+          {t({ sk: "Ruženec dokončený", en: "Rosary completed" })}
+        </h2>
+        <p className="text-lg leading-relaxed text-stone-800 whitespace-pre-wrap">
+          {t({
+            sk: "Ďakujeme za spoločnú modlitbu. Nech vás Panna Mária ochraňuje.",
+            en: "Thank you for praying with us. May the Virgin Mary protect you.",
+          })}
+        </p>
+      </div>
+    );
+  }
+
+  const decade = Math.max(0, Math.min(4, Math.floor((step - 7) / 13)));
+  const mystery = mysterySet.decades[decade] || mysterySet.decades[0];
+
+  return (
+    <PrayerDisplay
+      step={step}
+      mysterySetId={mysterySetId}
+      decadeIndex={decade}
+      mystery={mystery!}
+    />
+  );
+}
 
 export function PrayPage() {
   const { mysterySetId, step } = useParams<{
@@ -19,62 +68,305 @@ export function PrayPage() {
     step?: string;
   }>();
   const navigate = useNavigate();
-  const location = useLocation();
   const { t } = useLanguage();
 
-  const mysterySet = getMysterySet(mysterySetId || "");
+  const validMysterySetId = mysterySetId || "";
+  const mysterySet = getMysterySet(validMysterySetId);
   const currentStep = Math.max(
     0,
     Math.min(TOTAL_STEPS - 1, parseInt(step || "0", 10) || 0),
   );
 
-  // Entry animation: capture direction once on mount, never change it afterwards
-  const [entryClass, setEntryClass] = useState(() => {
-    const dir = (location.state as { direction?: "up" | "down" } | null)
-      ?.direction;
-    if (dir === "up") return "animate-slide-up-in";
-    if (dir === "down") return "animate-slide-down-in";
-    return "animate-fade-in";
-  });
+  const [finishedForStep, setFinishedForStep] = useState<number | null>(null);
+  const [showHint, setShowHint] = useState(true);
+  const [containerHeight, setContainerHeight] = useState(0);
+
+  const showFinished =
+    finishedForStep === currentStep && currentStep === TOTAL_STEPS - 1;
+  const effectiveStep: StepOrFinished = showFinished ? "finished" : currentStep;
+
+  // Refs for direct DOM manipulation (smooth 60 fps drag / animation)
+  const containerRef = useRef<HTMLDivElement>(null);
+  const currentCardRef = useRef<HTMLDivElement>(null);
+  const prevCardRef = useRef<HTMLDivElement>(null);
+  const nextCardRef = useRef<HTMLDivElement>(null);
+
+  const isDraggingRef = useRef(false);
+  const isAnimatingRef = useRef(false);
+  const dragStartYRef = useRef<number | null>(null);
+  const offsetYRef = useRef(0);
+  const containerHeightRef = useRef(0);
+  const hintDismissedRef = useRef(false);
 
   useEffect(() => {
-    isAnimatingRef.current = true;
-    const timer = setTimeout(() => {
-      setEntryClass("");
-      isAnimatingRef.current = false;
-    }, 400);
-    return () => clearTimeout(timer);
+    const el = containerRef.current;
+    if (!el) return;
+
+    const update = () => {
+      const H = el.clientHeight;
+      containerHeightRef.current = H;
+      setContainerHeight(H);
+    };
+    update();
+
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    window.addEventListener("resize", update);
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", update);
+    };
   }, []);
 
-  const [exitDirection, setExitDirection] = useState<"up" | "down" | null>(
-    null,
+  const applyOffset = useCallback((y: number) => {
+    offsetYRef.current = y;
+    const H = containerHeightRef.current;
+    if (currentCardRef.current) {
+      currentCardRef.current.style.transform = `translateY(${y}px)`;
+    }
+    if (prevCardRef.current) {
+      prevCardRef.current.style.transform = `translateY(${y - H}px)`;
+    }
+    if (nextCardRef.current) {
+      nextCardRef.current.style.transform = `translateY(${y + H}px)`;
+    }
+  }, []);
+
+  // Reset card positions whenever the effective step or container height changes
+  useLayoutEffect(() => {
+    applyOffset(0);
+  }, [effectiveStep, containerHeight, applyOffset]);
+
+  const setTransition = useCallback((ms: number) => {
+    const prop = `transform ${ms}ms cubic-bezier(0.22, 1, 0.36, 1)`;
+    if (currentCardRef.current) currentCardRef.current.style.transition = prop;
+    if (prevCardRef.current) prevCardRef.current.style.transition = prop;
+    if (nextCardRef.current) nextCardRef.current.style.transition = prop;
+  }, []);
+
+  const removeTransition = useCallback(() => {
+    if (currentCardRef.current) currentCardRef.current.style.transition = "";
+    if (prevCardRef.current) prevCardRef.current.style.transition = "";
+    if (nextCardRef.current) nextCardRef.current.style.transition = "";
+  }, []);
+
+  const animateTo = useCallback(
+    (targetY: number, onDone: () => void) => {
+      const startY = offsetYRef.current;
+      const distance = Math.abs(targetY - startY);
+      if (distance < 1) {
+        onDone();
+        return;
+      }
+      const direction = Math.sign(targetY - startY);
+      const startTime = performance.now();
+
+      const tick = (now: number) => {
+        const elapsed = now - startTime;
+        const traveled = Math.min(
+          distance,
+          (elapsed / 1000) * SPEED_AFTER_RELEASE,
+        );
+        const y = startY + direction * traveled;
+        applyOffset(y);
+        if (traveled < distance) {
+          requestAnimationFrame(tick);
+        } else {
+          applyOffset(targetY);
+          onDone();
+        }
+      };
+      requestAnimationFrame(tick);
+    },
+    [applyOffset],
   );
-  const [showHint, setShowHint] = useState(true);
 
-  // Drag tracking refs
-  const containerRef = useRef<HTMLDivElement>(null);
-  const dragStartY = useRef<number | null>(null);
-  const isDragging = useRef(false);
-  const isAnimatingRef = useRef(false);
-  const wheelCooldownRef = useRef(false);
-  const touchInProgress = useRef(false);
-  const velocitySamples = useRef<{ y: number; t: number }[]>([]);
-  const lastAppliedYRef = useRef(0);
-  const lastMoveTimeRef = useRef(0);
-  const navigateRef = useRef(navigate);
-  const mysterySetIdRef = useRef(mysterySetId);
+  const snapBack = useCallback(() => {
+    isAnimatingRef.current = true;
+    setTransition(SNAP_BACK_DURATION_MS);
+    applyOffset(0);
+    setTimeout(() => {
+      removeTransition();
+      isAnimatingRef.current = false;
+    }, SNAP_BACK_DURATION_MS + 20);
+  }, [applyOffset, removeTransition, setTransition]);
+
+  const handleSwitch = useCallback(
+    (direction: "up" | "down") => {
+      if (!hintDismissedRef.current) {
+        hintDismissedRef.current = true;
+        setShowHint(false);
+      }
+      isAnimatingRef.current = false;
+
+      if (direction === "up") {
+        if (effectiveStep === "finished") {
+          navigate("/");
+        } else if (currentStep === TOTAL_STEPS - 1) {
+          setFinishedForStep(currentStep);
+        } else {
+          navigate(`/pray/${validMysterySetId}/${currentStep + 1}`);
+        }
+      } else {
+        if (effectiveStep === "finished") {
+          setFinishedForStep(null);
+        } else {
+          navigate(`/pray/${validMysterySetId}/${currentStep - 1}`);
+        }
+      }
+    },
+    [effectiveStep, currentStep, validMysterySetId, navigate],
+  );
+
+  // Refs exposed to the wheel listener (stable across renders)
+  const effectiveStepRef = useRef(effectiveStep);
   const currentStepRef = useRef(currentStep);
+  const handleSwitchRef = useRef(handleSwitch);
+  const animateToRef = useRef(animateTo);
 
-  navigateRef.current = navigate;
-  mysterySetIdRef.current = mysterySetId;
+  useEffect(() => {
+    effectiveStepRef.current = effectiveStep;
+  }, [effectiveStep]);
 
   useEffect(() => {
     currentStepRef.current = currentStep;
   }, [currentStep]);
 
-  // Track if hint has been dismissed
-  const hintDismissedRef = useRef(false);
+  useEffect(() => {
+    handleSwitchRef.current = handleSwitch;
+  }, [handleSwitch]);
 
+  useEffect(() => {
+    animateToRef.current = animateTo;
+  }, [animateTo]);
+
+  const getCanGoDown = () => {
+    return effectiveStep === "finished" || currentStep > 0;
+  };
+
+  const applyResistance = (deltaY: number) => {
+    const canGoDown = getCanGoDown();
+    if (deltaY > 0 && !canGoDown) {
+      return deltaY * 0.25;
+    }
+    return deltaY;
+  };
+
+  const handleRelease = (deltaY: number) => {
+    isDraggingRef.current = false;
+    dragStartYRef.current = null;
+
+    const canGoUp = true;
+    const canGoDown = getCanGoDown();
+
+    if (deltaY < -SWIPE_THRESHOLD && canGoUp) {
+      isAnimatingRef.current = true;
+      animateTo(-containerHeightRef.current, () => {
+        handleSwitch("up");
+      });
+    } else if (deltaY > SWIPE_THRESHOLD && canGoDown) {
+      isAnimatingRef.current = true;
+      animateTo(containerHeightRef.current, () => {
+        handleSwitch("down");
+      });
+    } else {
+      snapBack();
+    }
+  };
+
+  // --- Touch handlers ---
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (isAnimatingRef.current || isDraggingRef.current) return;
+    dragStartYRef.current = e.touches[0].clientY;
+    isDraggingRef.current = true;
+    removeTransition();
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!isDraggingRef.current || dragStartYRef.current === null) return;
+    e.preventDefault();
+    const deltaY = e.touches[0].clientY - dragStartYRef.current;
+    applyOffset(applyResistance(deltaY));
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (!isDraggingRef.current || dragStartYRef.current === null) return;
+    const deltaY = e.changedTouches[0].clientY - dragStartYRef.current;
+    handleRelease(deltaY);
+  };
+
+  // --- Mouse drag handlers ---
+  const onMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    if (isAnimatingRef.current || isDraggingRef.current) return;
+    dragStartYRef.current = e.clientY;
+    isDraggingRef.current = true;
+    removeTransition();
+  };
+
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingRef.current || dragStartYRef.current === null) return;
+    const deltaY = e.clientY - dragStartYRef.current;
+    applyOffset(applyResistance(deltaY));
+  };
+
+  const onMouseUp = (e: React.MouseEvent) => {
+    if (!isDraggingRef.current || dragStartYRef.current === null) return;
+    const deltaY = e.clientY - dragStartYRef.current;
+    handleRelease(deltaY);
+  };
+
+  const onMouseLeave = () => {
+    if (!isDraggingRef.current) return;
+    isDraggingRef.current = false;
+    dragStartYRef.current = null;
+    snapBack();
+  };
+
+  // --- Wheel handler (desktop) ---
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    let accumulatedDelta = 0;
+    let wheelTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const onWheel = (e: WheelEvent) => {
+      if (isAnimatingRef.current) return;
+      e.preventDefault();
+      accumulatedDelta += e.deltaY;
+
+      if (wheelTimer) clearTimeout(wheelTimer);
+      wheelTimer = setTimeout(() => {
+        const canGoUp = true;
+        const canGoDown =
+          effectiveStepRef.current === "finished" || currentStepRef.current > 0;
+
+        if (accumulatedDelta > WHEEL_THRESHOLD && canGoUp) {
+          isAnimatingRef.current = true;
+          animateToRef.current(-containerHeightRef.current, () => {
+            handleSwitchRef.current("up");
+          });
+        } else if (accumulatedDelta < -WHEEL_THRESHOLD && canGoDown) {
+          isAnimatingRef.current = true;
+          animateToRef.current(containerHeightRef.current, () => {
+            handleSwitchRef.current("down");
+          });
+        }
+        accumulatedDelta = 0;
+        wheelTimer = null;
+      }, WHEEL_GROUP_MS);
+    };
+
+    container.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      container.removeEventListener("wheel", onWheel);
+      if (wheelTimer) clearTimeout(wheelTimer);
+    };
+  }, []);
+
+  // --- Hint auto-hide ---
   useEffect(() => {
     const timer = setTimeout(() => {
       if (!hintDismissedRef.current) {
@@ -84,418 +376,22 @@ export function PrayPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  // --- DOM helpers (operate directly on containerRef for zero-lag feedback) ---
+  // --- Render helpers ---
+  const prevStep: StepOrFinished | null =
+    effectiveStep === "finished"
+      ? TOTAL_STEPS - 1
+      : currentStep > 0
+        ? currentStep - 1
+        : null;
 
-  const setTr = (y: number, opacity: number) => {
-    const el = containerRef.current;
-    if (!el) return;
-    el.style.transform = `translateY(${y}px)`;
-    el.style.opacity = String(opacity);
-  };
+  const nextStep: StepOrFinished | null =
+    effectiveStep === "finished"
+      ? null
+      : currentStep === TOTAL_STEPS - 1
+        ? "finished"
+        : currentStep + 1;
 
-  const setTransition = (ms: number) => {
-    const el = containerRef.current;
-    if (!el) return;
-    el.style.transition = `transform ${ms}ms cubic-bezier(0.22, 1, 0.36, 1), opacity ${ms}ms ease`;
-  };
-
-  const removeTransition = () => {
-    const el = containerRef.current;
-    if (!el) return;
-    el.style.transition = "";
-  };
-
-  const resetPosition = () => {
-    const el = containerRef.current;
-    if (!el) return;
-    el.style.transform = "translateY(0)";
-    el.style.opacity = "1";
-  };
-
-  const computeVelocity = () => {
-    const s = velocitySamples.current;
-    if (s.length < 2) return 0;
-    const first = s[0];
-    const last = s[s.length - 1];
-    const dt = last.t - first.t;
-    return dt > 0 ? (last.y - first.y) / dt : 0;
-  };
-
-  const applyCappedTranslate = (desiredY: number, now: number) => {
-    const dt = now - lastMoveTimeRef.current;
-    lastMoveTimeRef.current = now;
-    let appliedY: number;
-    if (dt > 0) {
-      const maxStep = MAX_SWIPE_FOLLOW_SPEED_PX_PER_MS * dt;
-      const diff = desiredY - lastAppliedYRef.current;
-      if (Math.abs(diff) > maxStep) {
-        appliedY = lastAppliedYRef.current + Math.sign(diff) * maxStep;
-      } else {
-        appliedY = desiredY;
-      }
-    } else {
-      appliedY = desiredY;
-    }
-    lastAppliedYRef.current = appliedY;
-    const opacity = Math.max(0.3, 1 - Math.abs(appliedY) / 300);
-    setTr(appliedY, opacity);
-  };
-
-  const throwAnimate = (
-    fromY: number,
-    velocity: number,
-    direction: -1 | 1,
-    fromOpacity: number,
-    onComplete: () => void,
-  ) => {
-    const el = containerRef.current;
-    if (!el) return onComplete();
-
-    const speed = Math.max(Math.abs(velocity), MIN_THROW_SPEED);
-
-    const offScreenDist = 250;
-    const targetY = fromY + direction * offScreenDist;
-    const duration = Math.min(250, Math.max(80, offScreenDist / speed));
-
-    el.style.transform = `translateY(${fromY}px)`;
-    el.style.opacity = String(fromOpacity);
-
-    const start = performance.now();
-    const tick = (now: number) => {
-      const t = Math.min((now - start) / duration, 1);
-      const ease = 1 - Math.pow(1 - t, 3);
-      const y = fromY + (targetY - fromY) * ease;
-      const opacity = fromOpacity * (1 - ease);
-      setTr(y, Math.max(0, opacity));
-      if (t < 1) {
-        requestAnimationFrame(tick);
-      } else {
-        onComplete();
-      }
-    };
-    requestAnimationFrame(tick);
-  };
-
-
-  // --- Touch handlers ---
-
-  useEffect(() => {
-    const onTouchStart = (e: TouchEvent) => {
-      if (isAnimatingRef.current || isDragging.current) return;
-      dragStartY.current = e.touches[0].clientY;
-      isDragging.current = true;
-      touchInProgress.current = true;
-      velocitySamples.current = [];
-      lastAppliedYRef.current = 0;
-      lastMoveTimeRef.current = performance.now();
-      removeTransition();
-    };
-
-    const onTouchMove = (e: TouchEvent) => {
-      if (!isDragging.current || dragStartY.current === null) return;
-      e.preventDefault();
-      const deltaY = e.touches[0].clientY - dragStartY.current;
-      const isFinishedStep = currentStepRef.current === TOTAL_STEPS - 1;
-      const canGoUp = currentStepRef.current < TOTAL_STEPS - 1 || isFinishedStep;
-      const canGoDown = currentStepRef.current > 0;
-
-      let desiredY = deltaY;
-      if ((deltaY < 0 && !canGoUp) || (deltaY > 0 && !canGoDown)) {
-        desiredY = deltaY * 0.25;
-      }
-
-      const now = performance.now();
-      velocitySamples.current.push({ y: e.touches[0].clientY, t: now });
-      velocitySamples.current = velocitySamples.current.filter(
-        (s) => now - s.t < VELOCITY_SAMPLE_WINDOW_MS,
-      );
-
-      applyCappedTranslate(desiredY, now);
-    };
-
-    const onTouchEnd = (e: TouchEvent) => {
-      if (!isDragging.current || dragStartY.current === null) return;
-      const deltaY = e.changedTouches[0].clientY - dragStartY.current;
-      const velocity = computeVelocity();
-      const appliedY = lastAppliedYRef.current;
-      dragStartY.current = null;
-      isDragging.current = false;
-      velocitySamples.current = [];
-
-      const isFinishedStep = currentStepRef.current === TOTAL_STEPS - 1;
-      const canGoUp = currentStepRef.current < TOTAL_STEPS - 1 || isFinishedStep;
-      const canGoDown = currentStepRef.current > 0;
-
-      const finish = () => {
-        touchInProgress.current = false;
-        isAnimatingRef.current = false;
-      };
-
-      if (deltaY < -SWIPE_THRESHOLD && canGoUp) {
-        isAnimatingRef.current = true;
-        const startY = appliedY;
-        const startOpacity = Math.max(0.3, 1 - Math.abs(appliedY) / 300);
-        throwAnimate(startY, velocity, -1, startOpacity, () => {
-          if (!hintDismissedRef.current) {
-            hintDismissedRef.current = true;
-            setShowHint(false);
-          }
-          removeTransition();
-          resetPosition();
-          if (isFinishedStep) {
-            navigateRef.current("/", { state: { direction: "up" } });
-          } else {
-            navigateRef.current(
-              `/pray/${mysterySetIdRef.current}/${currentStepRef.current + 1}`,
-              { state: { direction: "up" } },
-            );
-          }
-          finish();
-        });
-      } else if (deltaY > SWIPE_THRESHOLD && canGoDown) {
-        isAnimatingRef.current = true;
-        const startY = appliedY;
-        const startOpacity = Math.max(0.3, 1 - Math.abs(appliedY) / 300);
-        throwAnimate(startY, velocity, 1, startOpacity, () => {
-          if (!hintDismissedRef.current) {
-            hintDismissedRef.current = true;
-            setShowHint(false);
-          }
-          removeTransition();
-          resetPosition();
-          navigateRef.current(
-            `/pray/${mysterySetIdRef.current}/${currentStepRef.current - 1}`,
-            { state: { direction: "down" } },
-          );
-          finish();
-        });
-      } else {
-        isAnimatingRef.current = true;
-        setTransition(SNAP_BACK_MS);
-        resetPosition();
-        setTimeout(() => {
-          removeTransition();
-          finish();
-        }, SNAP_BACK_MS + 20);
-      }
-    };
-
-    window.addEventListener("touchstart", onTouchStart, { passive: true });
-    window.addEventListener("touchmove", onTouchMove, { passive: false });
-    window.addEventListener("touchend", onTouchEnd, { passive: true });
-
-    return () => {
-      window.removeEventListener("touchstart", onTouchStart);
-      window.removeEventListener("touchmove", onTouchMove);
-      window.removeEventListener("touchend", onTouchEnd);
-    };
-  }, []);
-
-  // --- Mouse drag handlers (desktop) ---
-
-  useEffect(() => {
-    const onMouseDown = (e: MouseEvent) => {
-      if (touchInProgress.current) return;
-      if (e.button !== 0) return;
-      if (isAnimatingRef.current || isDragging.current) return;
-      dragStartY.current = e.clientY;
-      isDragging.current = true;
-      velocitySamples.current = [];
-      lastAppliedYRef.current = 0;
-      lastMoveTimeRef.current = performance.now();
-      removeTransition();
-    };
-
-    const onMouseMove = (e: MouseEvent) => {
-      if (!isDragging.current || dragStartY.current === null) return;
-      const deltaY = e.clientY - dragStartY.current;
-      const isFinishedStep = currentStepRef.current === TOTAL_STEPS - 1;
-      const canGoUp = currentStepRef.current < TOTAL_STEPS - 1 || isFinishedStep;
-      const canGoDown = currentStepRef.current > 0;
-
-      let desiredY = deltaY;
-      if ((deltaY < 0 && !canGoUp) || (deltaY > 0 && !canGoDown)) {
-        desiredY = deltaY * 0.25;
-      }
-
-      const now = performance.now();
-      velocitySamples.current.push({ y: e.clientY, t: now });
-      velocitySamples.current = velocitySamples.current.filter(
-        (s) => now - s.t < VELOCITY_SAMPLE_WINDOW_MS,
-      );
-
-      applyCappedTranslate(desiredY, now);
-    };
-
-    const onMouseUp = (e: MouseEvent) => {
-      if (!isDragging.current || dragStartY.current === null) return;
-      const deltaY = e.clientY - dragStartY.current;
-      const velocity = computeVelocity();
-      const appliedY = lastAppliedYRef.current;
-      dragStartY.current = null;
-      isDragging.current = false;
-      velocitySamples.current = [];
-
-      const isFinishedStep = currentStepRef.current === TOTAL_STEPS - 1;
-      const canGoUp = currentStepRef.current < TOTAL_STEPS - 1 || isFinishedStep;
-      const canGoDown = currentStepRef.current > 0;
-
-      const finish = () => {
-        isAnimatingRef.current = false;
-      };
-
-      if (deltaY < -SWIPE_THRESHOLD && canGoUp) {
-        isAnimatingRef.current = true;
-        const startY = appliedY;
-        const startOpacity = Math.max(0.3, 1 - Math.abs(appliedY) / 300);
-        throwAnimate(startY, velocity, -1, startOpacity, () => {
-          if (!hintDismissedRef.current) {
-            hintDismissedRef.current = true;
-            setShowHint(false);
-          }
-          removeTransition();
-          resetPosition();
-          if (isFinishedStep) {
-            navigateRef.current("/", { state: { direction: "up" } });
-          } else {
-            navigateRef.current(
-              `/pray/${mysterySetIdRef.current}/${currentStepRef.current + 1}`,
-              { state: { direction: "up" } },
-            );
-          }
-          finish();
-        });
-      } else if (deltaY > SWIPE_THRESHOLD && canGoDown) {
-        isAnimatingRef.current = true;
-        const startY = appliedY;
-        const startOpacity = Math.max(0.3, 1 - Math.abs(appliedY) / 300);
-        throwAnimate(startY, velocity, 1, startOpacity, () => {
-          if (!hintDismissedRef.current) {
-            hintDismissedRef.current = true;
-            setShowHint(false);
-          }
-          removeTransition();
-          resetPosition();
-          navigateRef.current(
-            `/pray/${mysterySetIdRef.current}/${currentStepRef.current - 1}`,
-            { state: { direction: "down" } },
-          );
-          finish();
-        });
-      } else {
-        isAnimatingRef.current = true;
-        setTransition(SNAP_BACK_MS);
-        resetPosition();
-        setTimeout(() => {
-          removeTransition();
-          finish();
-        }, SNAP_BACK_MS + 20);
-      }
-    };
-
-    window.addEventListener("mousedown", onMouseDown);
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
-
-    return () => {
-      window.removeEventListener("mousedown", onMouseDown);
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
-    };
-  }, []);
-
-  // --- Wheel listener ---
-
-  const goToStep = useCallback(
-    (s: number, direction: "up" | "down") => {
-      if (isAnimatingRef.current) return;
-      isAnimatingRef.current = true;
-      setExitDirection(direction);
-
-      if (!hintDismissedRef.current) {
-        hintDismissedRef.current = true;
-        setShowHint(false);
-      }
-
-      setTimeout(() => {
-        navigate(`/pray/${mysterySetId}/${s}`, { state: { direction } });
-        isAnimatingRef.current = false;
-        setExitDirection(null);
-      }, 250);
-    },
-    [mysterySetId, navigate],
-  );
-
-  const goToHome = useCallback(
-    (direction: "up" | "down") => {
-      if (isAnimatingRef.current) return;
-      isAnimatingRef.current = true;
-      setExitDirection(direction);
-
-      if (!hintDismissedRef.current) {
-        hintDismissedRef.current = true;
-        setShowHint(false);
-      }
-
-      setTimeout(() => {
-        navigate("/", { state: { direction } });
-        isAnimatingRef.current = false;
-        setExitDirection(null);
-      }, 250);
-    },
-    [navigate],
-  );
-
-  useEffect(() => {
-    const onWheel = (e: WheelEvent) => {
-      if (wheelCooldownRef.current) return;
-
-      const delta = e.deltaY;
-      const SCROLL_THRESHOLD = 40;
-
-      let navigated = false;
-      if (
-        delta > SCROLL_THRESHOLD &&
-        currentStepRef.current < TOTAL_STEPS - 1
-      ) {
-        goToStep(currentStepRef.current + 1, "up");
-        navigated = true;
-      } else if (
-        delta > SCROLL_THRESHOLD &&
-        currentStepRef.current === TOTAL_STEPS - 1
-      ) {
-        goToHome("up");
-        navigated = true;
-      } else if (delta < -SCROLL_THRESHOLD && currentStepRef.current > 0) {
-        goToStep(currentStepRef.current - 1, "down");
-        navigated = true;
-      }
-
-      if (navigated) {
-        wheelCooldownRef.current = true;
-        setTimeout(() => {
-          wheelCooldownRef.current = false;
-        }, 400);
-      }
-    };
-
-    window.addEventListener("wheel", onWheel, { passive: true });
-
-    return () => {
-      window.removeEventListener("wheel", onWheel);
-    };
-  }, [goToStep, goToHome]);
-
-  // --- Render ---
-
-  const isFinished = currentStep === TOTAL_STEPS - 1;
-
-  const exitClass =
-    exitDirection === "up"
-      ? "animate-slide-up-out"
-      : exitDirection === "down"
-        ? "animate-slide-down-out"
-        : "";
+  const isFinishedCard = effectiveStep === "finished";
 
   if (!mysterySet) {
     return (
@@ -514,65 +410,76 @@ export function PrayPage() {
     );
   }
 
-  const currentDecade = Math.max(
-    0,
-    Math.min(4, Math.floor((currentStep - 7) / 13)),
-  );
-  const currentMystery =
-    mysterySet.decades[currentDecade] || mysterySet.decades[0];
-
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col flex-1 gap-6">
       <ProgressIndicator currentStep={currentStep} />
 
-      {/* Swipeable prayer area */}
+      {/* Card stack */}
       <div
         ref={containerRef}
-        className={`relative min-h-[50vh] select-none touch-none no-scrollbar ${exitClass} ${entryClass}`}
+        className="relative flex-1 min-h-[50vh] overflow-hidden select-none touch-none no-scrollbar"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onMouseLeave={onMouseLeave}
       >
-        {isFinished ? (
-          <div className="bg-rosary-beige-light rounded-2xl border border-stone-200 p-6 sm:p-8 space-y-4">
-            <div className="flex justify-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-black/10 text-black">
-                <Check size={28} />
-              </div>
-            </div>
-            <h2 className="text-2xl font-bold text-stone-900 text-center">
-              {t({ sk: "Ruženec dokončený", en: "Rosary completed" })}
-            </h2>
-            <p className="text-lg leading-relaxed text-stone-800 whitespace-pre-wrap text-center">
-              {t({
-                sk: "Ďakujeme za spoločnú modlitbu. Nech vás Panna Mária ochraňuje.",
-                en: "Thank you for praying with us. May the Virgin Mary protect you.",
-              })}
-            </p>
+        {prevStep !== null && (
+          <div
+            ref={prevCardRef}
+            className="absolute inset-x-0 top-0 h-full will-change-transform"
+          >
+            <CardContent
+              step={prevStep}
+              mysterySetId={validMysterySetId}
+              mysterySet={mysterySet}
+            />
           </div>
-        ) : (
-          <PrayerDisplay
-            step={currentStep}
-            mysterySetId={mysterySetId!}
-            decadeIndex={currentDecade}
-            mystery={currentMystery}
-          />
         )}
 
-        {/* Swipe hint overlay */}
-        {showHint && !isFinished && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none animate-fade-in">
-            <div className="flex flex-col items-center gap-2 text-stone-400">
-              <ChevronUp size={24} className="animate-bounce" />
-              <span className="text-sm font-medium">
-                {t({
-                  sk: "Potiahnite nahor alebo dole",
-                  en: "Swipe up or down",
-                })}
-              </span>
-              <ChevronDown
-                size={24}
-                className="animate-bounce"
-                style={{ animationDelay: "0.15s" }}
-              />
+        <div
+          ref={currentCardRef}
+          className="absolute inset-x-0 top-0 h-full will-change-transform"
+        >
+          <CardContent
+            step={effectiveStep}
+            mysterySetId={validMysterySetId}
+            mysterySet={mysterySet}
+          />
+
+          {/* Swipe hint overlay */}
+          {showHint && !isFinishedCard && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none animate-fade-in">
+              <div className="flex flex-col items-center gap-2 text-stone-400">
+                <ChevronUp size={24} className="animate-bounce" />
+                <span className="text-sm font-medium">
+                  {t({
+                    sk: "Potiahnite nahor alebo dole",
+                    en: "Swipe up or down",
+                  })}
+                </span>
+                <ChevronDown
+                  size={24}
+                  className="animate-bounce"
+                  style={{ animationDelay: "0.15s" }}
+                />
+              </div>
             </div>
+          )}
+        </div>
+
+        {nextStep !== null && (
+          <div
+            ref={nextCardRef}
+            className="absolute inset-x-0 top-0 h-full will-change-transform"
+          >
+            <CardContent
+              step={nextStep}
+              mysterySetId={validMysterySetId}
+              mysterySet={mysterySet}
+            />
           </div>
         )}
       </div>

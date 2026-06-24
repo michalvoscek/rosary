@@ -33,7 +33,7 @@ export function Layout({ children }: { children: ReactNode }) {
       </header>
 
       {/* Main content */}
-      <main className="flex-1 max-w-2xl w-full mx-auto px-4 py-6 sm:py-8">
+      <main className="flex-1 flex flex-col max-w-2xl w-full mx-auto px-4 py-6 sm:py-8">
         {children}
       </main>
     </div>
