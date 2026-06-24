@@ -12,7 +12,7 @@ import { PrayerDisplay } from "../components/PrayerDisplay";
 import { ProgressIndicator } from "../components/ProgressIndicator";
 import { Check, Home, ChevronUp, ChevronDown } from "lucide-react";
 
-const TOTAL_STEPS = 7 + 13 * 5 + 1; // 73
+const TOTAL_STEPS = 7 + 13 * 5; // 72
 const SWIPE_THRESHOLD = 60; // px
 const SPEED_AFTER_RELEASE = 900; // px/s
 const WHEEL_THRESHOLD = 40; // px
@@ -72,18 +72,18 @@ export function PrayPage() {
 
   const validMysterySetId = mysterySetId || "";
   const mysterySet = getMysterySet(validMysterySetId);
-  const currentStep = Math.max(
-    0,
-    Math.min(TOTAL_STEPS - 1, parseInt(step || "0", 10) || 0),
-  );
+  const isFinishedUrl = step === String(TOTAL_STEPS);
+  const currentStep = isFinishedUrl
+    ? TOTAL_STEPS - 1
+    : Math.max(
+        0,
+        Math.min(TOTAL_STEPS - 1, parseInt(step || "0", 10) || 0),
+      );
 
-  const [finishedForStep, setFinishedForStep] = useState<number | null>(null);
   const [showHint, setShowHint] = useState(true);
   const [containerHeight, setContainerHeight] = useState(0);
 
-  const showFinished =
-    finishedForStep === currentStep && currentStep === TOTAL_STEPS - 1;
-  const effectiveStep: StepOrFinished = showFinished ? "finished" : currentStep;
+  const effectiveStep: StepOrFinished = isFinishedUrl ? "finished" : currentStep;
 
   // Refs for direct DOM manipulation (smooth 60 fps drag / animation)
   const containerRef = useRef<HTMLDivElement>(null);
@@ -204,13 +204,13 @@ export function PrayPage() {
         if (effectiveStep === "finished") {
           navigate("/");
         } else if (currentStep === TOTAL_STEPS - 1) {
-          setFinishedForStep(currentStep);
+          navigate(`/pray/${validMysterySetId}/${TOTAL_STEPS}`);
         } else {
           navigate(`/pray/${validMysterySetId}/${currentStep + 1}`);
         }
       } else {
         if (effectiveStep === "finished") {
-          setFinishedForStep(null);
+          navigate(`/pray/${validMysterySetId}/${TOTAL_STEPS - 1}`);
         } else {
           navigate(`/pray/${validMysterySetId}/${currentStep - 1}`);
         }

@@ -27,10 +27,7 @@ function getStage(step: number): Stage {
   if (step <= 58) {
     return { sk: "Desiatok 4", en: "Decade 4", start: 46, end: 58 };
   }
-  if (step <= 71) {
-    return { sk: "Desiatok 5", en: "Decade 5", start: 59, end: 71 };
-  }
-  return { sk: "Zdravas Kráľovná", en: "Hail Holy Queen", start: 72, end: 72 };
+  return { sk: "Desiatok 5", en: "Decade 5", start: 59, end: 71 };
 }
 
 export function ProgressIndicator({ currentStep }: ProgressIndicatorProps) {

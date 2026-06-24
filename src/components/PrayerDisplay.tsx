@@ -109,13 +109,6 @@ export function PrayerDisplay({ step, mysterySetId }: PrayerDisplayProps) {
       }
     }
 
-    if (s === decadeStart + blockSize * 5) {
-      return {
-        label: t(prayerLabels.hailHolyQueen),
-        text: t(prayers.hailHolyQueen),
-      };
-    }
-
     return { label: "", text: "" };
   };
 

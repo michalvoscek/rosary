@@ -29,10 +29,6 @@ export const prayers: Record<string, BilingualText> = {
     sk: "Ó, Ježišu, odpusť nám naše hriechy, zachráň nás od pekelného ohňa a priveď do neba všetky duše, najmä tie, ktoré najviac potrebujú tvoje milosrdenstvo. Amen.",
     en: "O my Jesus, forgive us our sins, save us from the fires of hell, lead all souls to Heaven, especially those who have most need of Thy mercy.",
   },
-  hailHolyQueen: {
-    sk: "Zdravas Kráľovná, Matka milosrdenstva, život náš i slasť i nádej náš, zdravas! Ku tebe voláme, vyhnanci synovia Evy, ku tebe vzdycháme, úfajúc a plačúc na tomto plačnom údolí. Preto, Orodovnica naša, obráť k nám svoje milosrdné oči a Ježiša, požehnaný plod života tvojho, nám po tejto púti ukáž. Ó láskavá, ó prívetivá, ó presladká Panna Mária! Amen.",
-    en: "Hail, Holy Queen, Mother of Mercy, our life, our sweetness and our hope. To thee do we cry, poor banished children of Eve; to thee do we send up our sighs, mourning and weeping in this valley of tears. Turn then, most gracious advocate, thine eyes of mercy toward us, and after this our exile, show unto us the blessed fruit of thy womb, Jesus. O clement, O loving, O sweet Virgin Mary! Amen.",
-  },
 };
 
 export const prayerLabels: Record<string, BilingualText> = {
@@ -42,6 +38,5 @@ export const prayerLabels: Record<string, BilingualText> = {
   hailMary: { sk: "Zdravas Mária", en: "Hail Mary" },
   gloryBe: { sk: "Sláva Otcu", en: "Glory Be" },
   fatimaPrayer: { sk: "Fatimská prosba", en: "Fatima Prayer" },
-  hailHolyQueen: { sk: "Zdravas Kráľovná", en: "Hail Holy Queen" },
   mystery: { sk: "Tajomstvo", en: "Mystery" },
 };
