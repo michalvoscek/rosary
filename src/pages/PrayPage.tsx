@@ -65,7 +65,7 @@ function CardContent({ step, mysterySetId, mysterySet }: CardContentProps) {
 export function PrayPage() {
   const { mysterySetId, step } = useParams<{
     mysterySetId: string;
-    step?: string;
+    step: string;
   }>();
   const navigate = useNavigate();
   const { t } = useLanguage();
@@ -77,7 +77,7 @@ export function PrayPage() {
     ? TOTAL_STEPS - 1
     : Math.max(
         0,
-        Math.min(TOTAL_STEPS - 1, parseInt(step || "0", 10) || 0),
+        Math.min(TOTAL_STEPS - 1, parseInt(step as string, 10) || 0),
       );
 
   const [showHint, setShowHint] = useState(true);

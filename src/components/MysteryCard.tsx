@@ -17,7 +17,7 @@ export function MysteryCard({
 
   return (
     <Link
-      to={`/pray/${mysterySet.id}`}
+      to={`/pray/${mysterySet.id}/0`}
       className="group block h-22 rounded-2xl border border-stone-200 bg-rosary-beige-light p-5 transition-all hover:shadow-md hover:border-stone-300 active:scale-[0.98]"
     >
       <div className="flex items-start justify-between mb-2">
