@@ -85,7 +85,7 @@ export function PrayPage() {
 
   const effectiveStep: StepOrFinished = isFinishedUrl ? "finished" : currentStep;
 
-  // Refs for direct DOM manipulation (smooth 60 fps drag / animation)
+  // Refs for direct DOM manipulation (compositor-driven, adapts to device refresh rate)
   const containerRef = useRef<HTMLDivElement>(null);
   const currentCardRef = useRef<HTMLDivElement>(null);
   const prevCardRef = useRef<HTMLDivElement>(null);
@@ -133,17 +133,23 @@ export function PrayPage() {
     }
   }, []);
 
-  // Reset card positions whenever the effective step or container height changes
+  // Reset card positions whenever the effective step or container height changes,
+  // but not during an active animation or drag (ResizeObserver-driven height
+  // changes would otherwise jump the card mid-motion).
   useLayoutEffect(() => {
+    if (isAnimatingRef.current || isDraggingRef.current) return;
     applyOffset(0);
   }, [effectiveStep, containerHeight, applyOffset]);
 
-  const setTransition = useCallback((ms: number) => {
-    const prop = `transform ${ms}ms cubic-bezier(0.22, 1, 0.36, 1)`;
-    if (currentCardRef.current) currentCardRef.current.style.transition = prop;
-    if (prevCardRef.current) prevCardRef.current.style.transition = prop;
-    if (nextCardRef.current) nextCardRef.current.style.transition = prop;
-  }, []);
+  const setTransition = useCallback(
+    (ms: number, easing = "cubic-bezier(0.22, 1, 0.36, 1)") => {
+      const prop = `transform ${ms}ms ${easing}`;
+      if (currentCardRef.current) currentCardRef.current.style.transition = prop;
+      if (prevCardRef.current) prevCardRef.current.style.transition = prop;
+      if (nextCardRef.current) nextCardRef.current.style.transition = prop;
+    },
+    [],
+  );
 
   const removeTransition = useCallback(() => {
     if (currentCardRef.current) currentCardRef.current.style.transition = "";
@@ -159,27 +165,33 @@ export function PrayPage() {
         onDone();
         return;
       }
-      const direction = Math.sign(targetY - startY);
-      const startTime = performance.now();
+      const duration = (distance / SPEED_AFTER_RELEASE) * 1000;
+      setTransition(duration, "linear");
+      applyOffset(targetY);
 
-      const tick = (now: number) => {
-        const elapsed = now - startTime;
-        const traveled = Math.min(
-          distance,
-          (elapsed / 1000) * SPEED_AFTER_RELEASE,
-        );
-        const y = startY + direction * traveled;
-        applyOffset(y);
-        if (traveled < distance) {
-          requestAnimationFrame(tick);
-        } else {
-          applyOffset(targetY);
-          onDone();
-        }
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        removeTransition();
+        cleanup();
+        onDone();
       };
-      requestAnimationFrame(tick);
+      const cleanup = () => {
+        if (currentCardRef.current) {
+          currentCardRef.current.removeEventListener("transitionend", onEnd);
+        }
+        if (fallback) clearTimeout(fallback);
+      };
+      const onEnd = (e: TransitionEvent) => {
+        if (e.propertyName !== "transform") return;
+        finish();
+      };
+      const el = currentCardRef.current;
+      if (el) el.addEventListener("transitionend", onEnd);
+      const fallback = setTimeout(finish, duration + 50);
     },
-    [applyOffset],
+    [applyOffset, setTransition, removeTransition],
   );
 
   const snapBack = useCallback(() => {
