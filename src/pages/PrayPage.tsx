@@ -14,7 +14,7 @@ import { Check, Home, ChevronUp, ChevronDown } from "lucide-react";
 
 const TOTAL_STEPS = 7 + 13 * 5; // 72
 const SWIPE_THRESHOLD = 60; // px
-const SPEED_AFTER_RELEASE = 1500; // px/s
+const SPEED_AFTER_RELEASE = 2500; // px/s
 const WHEEL_THRESHOLD = 40; // px
 const WHEEL_GROUP_MS = 120; // ms
 const SNAP_BACK_DURATION_MS = 250;
