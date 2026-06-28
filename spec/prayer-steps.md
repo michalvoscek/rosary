@@ -73,3 +73,4 @@ Speed of card after release is constant called SPEED_AFTER_RELEASE defined in pi
 On the desktop it is sufficient to use single scroll step to swap card. But multiple scrolls in row are grouped into single switch animation. The speed of the card after scroll is also defined by the SPEED_AFTER_RELEASE constant. Scroll down goes to next card and scroll up to previous card.
 During animation the next card should be comming from bottom at constant distance from the previous, and previous card should come from top also at constant distance from outgoing card. Speed of incoming card should always equal to the speed of the original card.
 Top of incomming card should be at "scrolling area height" distance from top of outgoing car
+Switching animation should be smooth and should adapt to device maximum refresh rate e.g. 120Hz display should have animation in 120 FPS.
