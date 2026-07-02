@@ -13,7 +13,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link
             to="/"
-            className="flex items-center gap-2 font-semibold text-lg tracking-tight"
+            className="flex items-center gap-2 font-semibold text-lg tracking-tight h-full px-4"
           >
             <BookOpen size={22} />
             <span>Rosary</span>
