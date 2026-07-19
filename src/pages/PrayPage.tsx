@@ -295,12 +295,30 @@ export function PrayPage() {
     removeTransition();
   };
 
-  const onTouchMove = (e: React.TouchEvent) => {
-    if (!isDraggingRef.current || dragStartYRef.current === null) return;
-    e.preventDefault();
-    const deltaY = e.touches[0].clientY - dragStartYRef.current;
-    applyOffset(applyResistance(deltaY));
-  };
+  // Native non-passive touchmove listener: React attaches delegated touch
+  // listeners as passive, so preventDefault() must go through a native
+  // listener (same approach as the wheel handler below).
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const onTouchMoveNative = (e: TouchEvent) => {
+      if (!isDraggingRef.current || dragStartYRef.current === null) return;
+      e.preventDefault();
+      const deltaY = e.touches[0].clientY - dragStartYRef.current;
+      const canGoDown =
+        effectiveStepRef.current === "finished" || currentStepRef.current > 0;
+      const resisted = deltaY > 0 && !canGoDown ? deltaY * 0.25 : deltaY;
+      applyOffset(resisted);
+    };
+
+    container.addEventListener("touchmove", onTouchMoveNative, {
+      passive: false,
+    });
+    return () => {
+      container.removeEventListener("touchmove", onTouchMoveNative);
+    };
+  }, [applyOffset]);
 
   const onTouchEnd = (e: React.TouchEvent) => {
     if (!isDraggingRef.current || dragStartYRef.current === null) return;
@@ -431,7 +449,6 @@ export function PrayPage() {
         ref={containerRef}
         className="relative flex-1 min-h-[50vh] overflow-hidden select-none touch-none no-scrollbar"
         onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
