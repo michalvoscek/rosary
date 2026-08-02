@@ -10,6 +10,10 @@ if ("serviceWorker" in navigator) {
   });
 }
 
+if (navigator.storage?.persist) {
+  void navigator.storage.persist();
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter basename="/rosary/">

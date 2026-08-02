@@ -10,6 +10,7 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { getMysterySet } from "../data/mysteries";
 import { PrayerDisplay } from "../components/PrayerDisplay";
 import { ProgressIndicator } from "../components/ProgressIndicator";
+import { usePrayerStreak } from "../hooks/usePrayerStreak";
 import { Check, Home, ChevronUp, ChevronDown } from "lucide-react";
 
 const TOTAL_STEPS = 7 + 13 * 5; // 72
@@ -84,6 +85,12 @@ export function PrayPage() {
   const [containerHeight, setContainerHeight] = useState(0);
 
   const effectiveStep: StepOrFinished = isFinishedUrl ? "finished" : currentStep;
+
+  const { recordPrayerDayIfStarted } = usePrayerStreak(
+    currentStep,
+    validMysterySetId,
+    !!mysterySet,
+  );
 
   // Refs for direct DOM manipulation (compositor-driven, adapts to device refresh rate)
   const containerRef = useRef<HTMLDivElement>(null);
@@ -216,6 +223,7 @@ export function PrayPage() {
         if (effectiveStep === "finished") {
           navigate("/");
         } else if (currentStep === TOTAL_STEPS - 1) {
+          recordPrayerDayIfStarted();
           navigate(`/pray/${validMysterySetId}/${TOTAL_STEPS}`);
         } else {
           navigate(`/pray/${validMysterySetId}/${currentStep + 1}`);
@@ -228,7 +236,7 @@ export function PrayPage() {
         }
       }
     },
-    [effectiveStep, currentStep, validMysterySetId, navigate],
+    [effectiveStep, currentStep, validMysterySetId, navigate, recordPrayerDayIfStarted],
   );
 
   // Refs exposed to the wheel listener (stable across renders)
