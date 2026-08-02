@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { getDateKey, recordPrayerDay } from "../lib/streak";
+import { STREAK_UPDATED_EVENT } from "./useStreak";
 
 interface StartMarker {
   mysterySetId: string;
@@ -27,9 +28,14 @@ export function usePrayerStreak(
     setStartMarker({ mysterySetId, date: getDateKey() });
   }
 
-  const recordPrayerDayIfStarted = useCallback(() => {
+  const recordPrayerDayIfStarted = useCallback(async () => {
     if (!startMarker || startMarker.mysterySetId !== mysterySetId) return;
-    void recordPrayerDay(startMarker.date).catch(() => {});
+    try {
+      await recordPrayerDay(startMarker.date);
+      window.dispatchEvent(new Event(STREAK_UPDATED_EVENT));
+    } catch {
+      // Ignore: streak will not be counted for this day.
+    }
     setStartMarker(null);
   }, [startMarker, mysterySetId]);
 

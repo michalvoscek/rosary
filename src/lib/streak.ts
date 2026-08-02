@@ -40,3 +40,26 @@ export async function recordPrayerDay(dateKey: string): Promise<void> {
     tx.onerror = () => reject(tx.error);
   });
 }
+
+export async function getPrayerDays(): Promise<Set<string>> {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, "readonly");
+    const request = tx.objectStore(STORE_NAME).getAllKeys();
+    request.onsuccess = () => resolve(new Set(request.result as string[]));
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export function getStreak(prayerDays: Set<string>, date = new Date()): number {
+  const cursor = new Date(date);
+  if (!prayerDays.has(getDateKey(cursor))) {
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  let streak = 0;
+  while (prayerDays.has(getDateKey(cursor))) {
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
+}
