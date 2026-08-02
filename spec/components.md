@@ -10,7 +10,7 @@
 
 ### Structure
 ```
-<div min-h-screen flex flex-col bg-stone-50>
+<div min-h-dvh flex flex-col bg-stone-50>
   ├─ <header> (sticky top-0, z-50)
   │   └─ <div> max-w-2xl, h-14, flex justify-between
   │       ├─ Logo (BookOpen + "Rosary")

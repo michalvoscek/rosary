@@ -455,7 +455,7 @@ export function PrayPage() {
       {/* Card stack */}
       <div
         ref={containerRef}
-        className="relative flex-1 min-h-[50vh] overflow-hidden select-none touch-none no-scrollbar"
+        className="relative flex-1 min-h-[50dvh] overflow-hidden select-none touch-none no-scrollbar"
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
         onMouseDown={onMouseDown}

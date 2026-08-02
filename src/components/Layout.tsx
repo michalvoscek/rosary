@@ -9,7 +9,7 @@ export function Layout({ children }: { children: ReactNode }) {
   const streak = useStreak();
 
   return (
-    <div className="min-h-screen flex flex-col bg-rosary-beige text-stone-800">
+    <div className="min-h-dvh flex flex-col bg-rosary-beige text-stone-800">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-rosary-beige-light backdrop-blur border-b border-stone-200">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
