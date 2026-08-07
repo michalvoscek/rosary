@@ -24,7 +24,7 @@ export function Layout({ children }: { children: ReactNode }) {
           <div className="flex items-center gap-2">
             {streak > 0 && (
               <span
-                className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-semibold text-orange-600"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-semibold"
                 title="Daily prayer streak"
                 aria-label={`Daily prayer streak: ${streak} days`}
               >
