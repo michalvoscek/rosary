@@ -7,3 +7,8 @@ For every day that prayer was made we insert into DB string with format `${year}
 To get current date we use users local timezone.
 In case prayer is started on one day ind finished on another use day of the start to track streak (not date of prayer finish).
 If someone just opened prayer on link for page different than first one and did not finish whole prayer do not count it towards streak.
+
+
+## Calender
+
+On clicking streak icon there should be page that shows calendar with dates that prayer happened highlighted.
