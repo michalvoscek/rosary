@@ -68,9 +68,9 @@ function MonthCalendar({ month, days, todayKey }: MonthCalendarProps) {
               key={dateKey}
               className={`flex items-center justify-center h-9 rounded-full text-sm ${
                 prayed
-                  ? "bg-rosary-gold font-semibold text-white"
+                  ? "bg-black font-semibold text-white"
                   : "text-stone-700"
-              } ${isToday ? "ring-2 ring-rosary-gold ring-offset-1" : ""}`}
+              } ${isToday ? "ring-2 ring-black ring-offset-1" : ""}`}
               aria-label={dateKey}
             >
               {day}
