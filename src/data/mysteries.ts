@@ -86,3 +86,20 @@ export const weekdayNames: { sk: string[]; en: string[] } = {
   sk: ['Nedeľa', 'Pondelok', 'Utorok', 'Streda', 'Štvrtok', 'Piatok', 'Sobota'],
   en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
 };
+
+export const monthNames: { sk: string[]; en: string[] } = {
+  sk: [
+    'Január', 'Február', 'Marec', 'Apríl', 'Máj', 'Jún',
+    'Júl', 'August', 'September', 'Október', 'November', 'December',
+  ],
+  en: [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
+  ],
+};
+
+// Week starts on Monday (index 0 = Monday).
+export const weekdayNamesMondayFirst: { sk: string[]; en: string[] } = {
+  sk: ['Po', 'Ut', 'St', 'Št', 'Pi', 'So', 'Ne'],
+  en: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'],
+};

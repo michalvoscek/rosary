@@ -22,14 +22,15 @@ export function Layout({ children }: { children: ReactNode }) {
           </Link>
 
           <div className="flex items-center gap-2">
-            <span
-              className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-semibold"
+            <Link
+              to="/calendar"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-semibold hover:bg-black/10 transition-colors"
               title="Daily prayer streak"
               aria-label={`Daily prayer streak: ${streak} days`}
             >
               <Flame size={16} fill="currentColor" />
               {streak}
-            </span>
+            </Link>
             <button
               onClick={toggleLang}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium text-stone-600 hover:text-stone-900 hover:bg-black/10 transition-colors"
