@@ -11,4 +11,6 @@ If someone just opened prayer on link for page different than first one and did 
 
 ## Calender
 
-On clicking streak icon there should be page that shows calendar with dates that prayer happened highlighted.
+On clicking streak icon there should be page that shows calendar with dates that prayer happened highlighted.  
+The calendar should display current month by be scrollable vertically for future and past months.  
+Week should start with Monday.  
