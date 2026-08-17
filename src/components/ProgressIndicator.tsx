@@ -11,23 +11,17 @@ interface Stage {
   end: number;
 }
 
+const SECTIONS: Stage[] = [
+  { sk: "Úvod", en: "Start", start: 0, end: 6 },
+  { sk: "Desiatok 1", en: "Decade 1", start: 7, end: 19 },
+  { sk: "Desiatok 2", en: "Decade 2", start: 20, end: 32 },
+  { sk: "Desiatok 3", en: "Decade 3", start: 33, end: 45 },
+  { sk: "Desiatok 4", en: "Decade 4", start: 46, end: 58 },
+  { sk: "Desiatok 5", en: "Decade 5", start: 59, end: 71 },
+];
+
 function getStage(step: number): Stage {
-  if (step <= 6) {
-    return { sk: "Úvod", en: "Start", start: 0, end: 6 };
-  }
-  if (step <= 19) {
-    return { sk: "Desiatok 1", en: "Decade 1", start: 7, end: 19 };
-  }
-  if (step <= 32) {
-    return { sk: "Desiatok 2", en: "Decade 2", start: 20, end: 32 };
-  }
-  if (step <= 45) {
-    return { sk: "Desiatok 3", en: "Decade 3", start: 33, end: 45 };
-  }
-  if (step <= 58) {
-    return { sk: "Desiatok 4", en: "Decade 4", start: 46, end: 58 };
-  }
-  return { sk: "Desiatok 5", en: "Decade 5", start: 59, end: 71 };
+  return SECTIONS.find((section) => step <= section.end) ?? SECTIONS[5];
 }
 
 export function ProgressIndicator({ currentStep }: ProgressIndicatorProps) {
@@ -37,7 +31,7 @@ export function ProgressIndicator({ currentStep }: ProgressIndicatorProps) {
   const stageProgress =
     stageSize === 1
       ? 100
-      : Math.round(((currentStep - stage.start) / (stageSize - 1)) * 100);
+      : Math.round(((currentStep - stage.start) / (stageSize)) * 100);
 
   return (
     <div className="space-y-2">
@@ -47,11 +41,27 @@ export function ProgressIndicator({ currentStep }: ProgressIndicatorProps) {
         </span>
         <span>{stageProgress}%</span>
       </div>
-      <div className="h-2 bg-stone-200 rounded-full overflow-hidden">
-        <div
-          className="h-full bg-black rounded-full transition-all duration-500 ease-out"
-          style={{ width: `${stageProgress}%` }}
-        />
+      <div className="flex gap-1">
+        {SECTIONS.map((section) => {
+          const sectionSize = section.end - section.start + 1;
+          const fill = Math.min(
+            1,
+            Math.max(0, (currentStep - section.start) / sectionSize),
+          );
+
+          return (
+            <div
+              key={section.sk}
+              className="h-2 bg-stone-200 rounded-full overflow-hidden"
+              style={{ flexGrow: sectionSize }}
+            >
+              <div
+                className="h-full bg-black rounded-full transition-all duration-500 ease-out"
+                style={{ width: `${fill * 100}%` }}
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );
