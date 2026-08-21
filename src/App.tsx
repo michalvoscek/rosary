@@ -19,7 +19,7 @@ function AnimatedRoutes() {
       : '';
 
   return (
-    <div key={transitionId} className={animationClass}>
+    <div key={transitionId} className={`flex flex-col flex-1 ${animationClass}`}>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/pray/:mysterySetId" element={<PrayPage />} />
