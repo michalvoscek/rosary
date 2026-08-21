@@ -41,6 +41,64 @@ body {
   animation: fadeIn 0.3s ease-out forwards;
 }
 
+/* Page switching animation */
+@keyframes page-enter-forward {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes page-enter-back {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.page-enter-forward {
+  animation: page-enter-forward 150ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform;
+}
+
+.page-enter-back {
+  animation: page-enter-back 150ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform;
+}
+
+/* On desktop extend the slide beyond the content borders to use the padding/margin */
+@media (min-width: 640px) {
+  @keyframes page-enter-forward-desktop {
+    from {
+      transform: translateX(calc(100% + 4rem));
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes page-enter-back-desktop {
+    from {
+      transform: translateX(calc(-100% - 4rem));
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  .page-enter-forward {
+    animation-name: page-enter-forward-desktop;
+  }
+
+  .page-enter-back {
+    animation-name: page-enter-back-desktop;
+  }
+}
+
 /* Hide scrollbar but keep functionality */
 .no-scrollbar::-webkit-scrollbar {
   display: none;

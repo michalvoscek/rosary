@@ -4,19 +4,41 @@ import { Layout } from './components/Layout';
 import { HomePage } from './pages/HomePage';
 import { PrayPage } from './pages/PrayPage';
 import { StreakCalendarPage } from './pages/StreakCalendarPage';
+import {
+  PageTransitionProvider,
+  usePageTransition,
+} from './hooks/usePageTransition';
+
+function AnimatedRoutes() {
+  const { direction, transitionId } = usePageTransition();
+  const animationClass =
+    transitionId > 0
+      ? direction === 'forward'
+        ? 'page-enter-forward'
+        : 'page-enter-back'
+      : '';
+
+  return (
+    <div key={transitionId} className={animationClass}>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/pray/:mysterySetId" element={<PrayPage />} />
+        <Route path="/pray/:mysterySetId/:step" element={<PrayPage />} />
+        <Route path="/calendar" element={<StreakCalendarPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </div>
+  );
+}
 
 function App() {
   return (
     <LanguageProvider>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/pray/:mysterySetId" element={<PrayPage />} />
-          <Route path="/pray/:mysterySetId/:step" element={<PrayPage />} />
-          <Route path="/calendar" element={<StreakCalendarPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Layout>
+      <PageTransitionProvider>
+        <Layout>
+          <AnimatedRoutes />
+        </Layout>
+      </PageTransitionProvider>
     </LanguageProvider>
   );
 }
