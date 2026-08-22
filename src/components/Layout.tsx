@@ -1,11 +1,9 @@
 import { Link } from "react-router-dom";
-import { useLanguage } from "../contexts/LanguageContext";
 import { useStreak } from "../hooks/useStreak";
-import { Flame, Globe, BookOpen } from "lucide-react";
+import { Flame, BookOpen, Settings } from "lucide-react";
 import type { ReactNode } from "react";
 
 export function Layout({ children }: { children: ReactNode }) {
-  const { lang, toggleLang } = useLanguage();
   const streak = useStreak();
 
   return (
@@ -31,16 +29,14 @@ export function Layout({ children }: { children: ReactNode }) {
               <Flame size={16} fill="currentColor" />
               {streak}
             </Link>
-            <button
-              onClick={toggleLang}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium text-stone-600 hover:text-stone-900 hover:bg-black/10 transition-colors"
-              aria-label="Toggle language"
+            <Link
+              to="/settings"
+              className="flex items-center justify-center p-2 rounded-full text-stone-600 hover:text-stone-900 hover:bg-black/10 transition-colors"
+              title="Settings"
+              aria-label="Settings"
             >
-              <Globe size={16} />
-              <span className="uppercase font-semibold tracking-wide">
-                {lang}
-              </span>
-            </button>
+              <Settings size={18} />
+            </Link>
           </div>
         </div>
       </header>

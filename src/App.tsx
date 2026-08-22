@@ -4,6 +4,7 @@ import { Layout } from './components/Layout';
 import { HomePage } from './pages/HomePage';
 import { PrayPage } from './pages/PrayPage';
 import { StreakCalendarPage } from './pages/StreakCalendarPage';
+import { SettingsPage } from './pages/SettingsPage';
 import {
   PageTransitionProvider,
   usePageTransition,
@@ -25,6 +26,7 @@ function AnimatedRoutes() {
         <Route path="/pray/:mysterySetId" element={<PrayPage />} />
         <Route path="/pray/:mysterySetId/:step" element={<PrayPage />} />
         <Route path="/calendar" element={<StreakCalendarPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
