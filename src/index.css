@@ -74,6 +74,13 @@
   --overlay: rgb(255 255 255 / 0.1);
 }
 
+html,
+body,
+#root {
+  background-color: var(--surface);
+  min-height: 100%;
+}
+
 html {
   overscroll-behavior: none;
 }
