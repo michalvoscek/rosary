@@ -42,3 +42,17 @@ All colors are defined in a single place: `src/index.css`.
   the selection persists in localStorage (`rosary-theme`).
 - Mystery accent colors (`--mystery-*`) are theme-independent and used via
   inline styles.
+
+## Status Bar / Edge-to-Edge
+- The app is edge-to-edge (`viewport-fit=cover`): the sticky header's
+  `bg-surface` extends behind the OS status bar via
+  `pt-[env(safe-area-inset-top)]`, so the top edge always matches the app
+  theme — even mid-transition during a theme switch.
+- `ThemeContext` additionally replaces the `theme-color` meta on every theme
+  change (a probe element resolves the final `--surface`; Chrome Android
+  ignores `setAttribute()` on an existing meta tag). This still matters for
+  Android versions without enforced edge-to-edge and for in-browser toolbars.
+- Known platform limitation: with the device in system dark mode, some
+  Chromium builds force the status bar to black, ignoring `theme-color`
+  (https://issues.chromium.org/issues/40634649). The edge-to-edge header
+  keeps the seam invisible on Android 15+ regardless.

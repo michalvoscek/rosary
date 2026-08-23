@@ -8,8 +8,9 @@ export function Layout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-dvh flex flex-col bg-app text-body overflow-x-clip">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-surface border-b border-line">
+      {/* Header: bg extends behind the OS status bar (edge-to-edge) so the
+          top edge always matches the app theme, even mid-transition */}
+      <header className="sticky top-0 z-50 bg-surface border-b border-line pt-[env(safe-area-inset-top)]">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link
             to="/"
