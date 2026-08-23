@@ -26,16 +26,16 @@ export function Layout({ children }: { children: ReactNode }) {
               title="Daily prayer streak"
               aria-label={`Daily prayer streak: ${streak} days`}
             >
-              <Flame size={16} fill="currentColor" />
+              <Flame size={22} fill="currentColor" />
               {streak}
             </Link>
             <Link
               to="/settings"
-              className="flex items-center justify-center p-2 rounded-full text-muted hover:text-heading hover:bg-overlay transition-colors"
+              className="flex items-center justify-center p-2 rounded-full hover:text-heading hover:bg-overlay transition-colors"
               title="Settings"
               aria-label="Settings"
             >
-              <Settings size={18} />
+              <Settings size={22} />
             </Link>
           </div>
         </div>
