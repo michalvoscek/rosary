@@ -9,7 +9,7 @@ export function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh flex flex-col bg-app text-body overflow-x-clip">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-surface backdrop-blur border-b border-line">
+      <header className="sticky top-0 z-50 bg-surface border-b border-line">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link
             to="/"
