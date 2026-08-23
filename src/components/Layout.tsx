@@ -7,9 +7,9 @@ export function Layout({ children }: { children: ReactNode }) {
   const streak = useStreak();
 
   return (
-    <div className="min-h-dvh flex flex-col bg-rosary-beige text-stone-800 overflow-x-clip">
+    <div className="min-h-dvh flex flex-col bg-app text-body overflow-x-clip">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-rosary-beige-light backdrop-blur border-b border-stone-200">
+      <header className="sticky top-0 z-50 bg-surface backdrop-blur border-b border-line">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link
             to="/"
@@ -22,7 +22,7 @@ export function Layout({ children }: { children: ReactNode }) {
           <div className="flex items-center gap-2">
             <Link
               to="/calendar"
-              className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-semibold hover:bg-black/10 transition-colors"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-semibold hover:bg-overlay transition-colors"
               title="Daily prayer streak"
               aria-label={`Daily prayer streak: ${streak} days`}
             >
@@ -31,7 +31,7 @@ export function Layout({ children }: { children: ReactNode }) {
             </Link>
             <Link
               to="/settings"
-              className="flex items-center justify-center p-2 rounded-full text-stone-600 hover:text-stone-900 hover:bg-black/10 transition-colors"
+              className="flex items-center justify-center p-2 rounded-full text-muted hover:text-heading hover:bg-overlay transition-colors"
               title="Settings"
               aria-label="Settings"
             >

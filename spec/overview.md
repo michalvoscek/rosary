@@ -31,14 +31,14 @@ A bilingual (Slovak / English) Progressive Web App for praying the Rosary. Progr
 All pages are wrapped in `Layout.tsx`:
 - **Sticky header** (top): Logo + language toggle (`SK` / `EN`)
 - **Main content area**: `max-w-2xl`, centered, `px-4` padding
-- **Background**: `bg-stone-50` with white cards on top
+- **Background**: `bg-app` page background with `bg-surface` cards on top
 
 ## Theme Tokens
-```
---color-rosary-purple:  #7c3aed
---color-rosary-purple-light: #a78bfa
---color-rosary-gold:    #f59e0b
---color-rosary-rose:    #f43f5e
---color-rosary-blue:    #3b82f6
---color-rosary-green:   #10b981
-```
+All colors are defined in a single place: `src/index.css`.
+- Semantic tokens (`--app`, `--surface`, `--body`, ...) are mapped to Tailwind
+  utilities via `@theme inline` and get their values from the light (`:root`)
+  and `[data-theme="dark"]` blocks.
+- `ThemeContext` switches themes by setting `data-theme` on `<html>`;
+  the selection persists in localStorage (`rosary-theme`).
+- Mystery accent colors (`--mystery-*`) are theme-independent and used via
+  inline styles.

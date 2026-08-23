@@ -23,14 +23,14 @@ function CardContent({ step, mysterySetId, mysterySet }: CardContentProps) {
 
   if (step === "finished") {
     return (
-      <div className="bg-rosary-beige-light rounded-2xl border border-stone-200 p-6 sm:p-8 flex flex-col items-center justify-center gap-4 text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-black/10 text-black">
+      <div className="bg-surface rounded-2xl border border-line p-6 sm:p-8 flex flex-col items-center justify-center gap-4 text-center">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-overlay text-accent">
           <Check size={28} />
         </div>
-        <h2 className="text-2xl font-bold text-stone-900">
+        <h2 className="text-2xl font-bold text-heading">
           {t({ sk: "Ruženec dokončený", en: "Rosary completed" })}
         </h2>
-        <p className="text-lg leading-relaxed text-stone-800 whitespace-pre-wrap">
+        <p className="text-lg leading-relaxed text-body whitespace-pre-wrap">
           {t({
             sk: "Ďakujeme za spoločnú modlitbu. Nech vás Panna Mária ochraňuje.",
             en: "Thank you for praying with us. May the Virgin Mary protect you.",
@@ -139,12 +139,12 @@ export function PrayPage() {
   if (!mysterySet) {
     return (
       <div className="text-center py-20">
-        <p className="text-stone-500">
+        <p className="text-muted">
           {t({ sk: "Tajomstvo nenájdené", en: "Mystery not found" })}
         </p>
         <button
           onClick={() => navigate("/")}
-          className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rosary-purple text-white text-sm font-medium hover:bg-rosary-purple/90 transition-colors"
+          className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-on-primary text-sm font-medium hover:bg-primary/90 transition-colors"
         >
           <Home size={16} />
           {t({ sk: "Späť domov", en: "Back home" })}
@@ -187,7 +187,7 @@ export function PrayPage() {
         overlay={
           showHint && !isFinishedCard ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none animate-fade-in">
-              <div className="flex flex-col items-center gap-2 text-stone-400">
+              <div className="flex flex-col items-center gap-2 text-faint">
                 <ChevronUp size={24} className="animate-bounce" />
                 <span className="text-sm font-medium">
                   {t({

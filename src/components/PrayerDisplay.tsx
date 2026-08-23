@@ -115,15 +115,15 @@ export function PrayerDisplay({ step, mysterySetId }: PrayerDisplayProps) {
   const { label, text } = getPrayer(step);
 
   return (
-    <div className="bg-rosary-beige-light rounded-2xl border border-stone-200 p-6 sm:p-8 flex flex-col">
+    <div className="bg-surface rounded-2xl border border-line p-6 sm:p-8 flex flex-col">
       <div className="text-center shrink-0">
-        <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-stone-100 text-stone-600 mb-3">
+        <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-subtle text-muted mb-3">
           {label}
         </span>
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar">
-        <p className="text-lg sm:text-xl leading-relaxed text-stone-800 whitespace-pre-wrap text-center">
+        <p className="text-lg sm:text-xl leading-relaxed text-body whitespace-pre-wrap text-center">
           {text}
         </p>
       </div>

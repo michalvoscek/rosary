@@ -1,14 +1,75 @@
 @import "tailwindcss";
 
-@theme {
-  --color-rosary-purple: #7c3aed;
-  --color-rosary-purple-light: #a78bfa;
-  --color-rosary-gold: #f59e0b;
-  --color-rosary-rose: #f43f5e;
-  --color-rosary-blue: #3b82f6;
-  --color-rosary-green: #10b981;
-  --color-rosary-beige-light: #faf0e6;
-  --color-rosary-beige: #eed9c4;
+/*
+ * Single source of truth for every color in the app.
+ * Semantic tokens are exposed as Tailwind utilities via `@theme inline`
+ * (bg-app, text-body, border-line, ...) and get their values from the
+ * light/dark blocks below. ThemeContext switches themes by setting
+ * data-theme on <html>.
+ */
+@theme inline {
+  --color-app: var(--app);
+  --color-surface: var(--surface);
+  --color-subtle: var(--subtle);
+  --color-input: var(--input);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-heading: var(--heading);
+  --color-body: var(--body);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-track: var(--track);
+  --color-overlay: var(--overlay);
+}
+
+/* Light theme (default) */
+:root,
+[data-theme="light"] {
+  --app: #eed9c4;
+  --surface: #faf0e6;
+  --subtle: #f5f5f4;
+  --input: #ffffff;
+  --line: #e7e5e4;
+  --line-strong: #d6d3d1;
+  --heading: #1c1917;
+  --body: #292524;
+  --muted: #57534e;
+  --faint: #a8a29e;
+  --accent: #000000;
+  --on-accent: #ffffff;
+  --primary: #7c3aed;
+  --on-primary: #ffffff;
+  --track: #a8a29e;
+  --overlay: rgb(0 0 0 / 0.1);
+
+  /* Theme-independent mystery accents (used via inline styles) */
+  --mystery-joyful: #7c3aed;
+  --mystery-sorrowful: #f43f5e;
+  --mystery-glorious: #f59e0b;
+  --mystery-luminous: #3b82f6;
+}
+
+[data-theme="dark"] {
+  --app: #1c1917;
+  --surface: #292524;
+  --subtle: #44403c;
+  --input: #292524;
+  --line: #44403c;
+  --line-strong: #57534e;
+  --heading: #fafaf9;
+  --body: #e7e5e4;
+  --muted: #a8a29e;
+  --faint: #78716c;
+  --accent: #fafaf9;
+  --on-accent: #1c1917;
+  --primary: #7c3aed;
+  --on-primary: #ffffff;
+  --track: #57534e;
+  --overlay: rgb(255 255 255 / 0.1);
 }
 
 html {

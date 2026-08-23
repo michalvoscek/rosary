@@ -15,8 +15,9 @@ export default defineConfig({
         short_name: "Rosary",
         description:
           "Interactive Rosary prayer app with bilingual support (Slovak/English)",
+        // Install-time colors; keep in sync with the light theme in src/index.css
         theme_color: "#faf0e6",
-        background_color: "#ffffff",
+        background_color: "#eed9c4",
         display: "standalone",
         orientation: "portrait",
         scope: "/rosary/",

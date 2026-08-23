@@ -18,20 +18,20 @@ export function MysteryCard({
   return (
     <Link
       to={`/pray/${mysterySet.id}/0`}
-      className="group block h-22 rounded-2xl border border-stone-200 bg-rosary-beige-light p-5 transition-all hover:shadow-md hover:border-stone-300 active:scale-[0.98]"
+      className="group block h-22 rounded-2xl border border-line bg-surface p-5 transition-all hover:shadow-md hover:border-line-strong active:scale-[0.98]"
     >
       <div className="flex items-start justify-between mb-2">
         <div>
-          <h3 className="font-semibold text-lg text-stone-900">
+          <h3 className="font-semibold text-lg text-heading">
             {t(mysterySet.title)}
           </h3>
-          <p className="text-sm text-stone-500">
+          <p className="text-sm text-muted">
             {weekdayLabel || t(mysterySet.subtitle)}
           </p>
         </div>
         {isRecommended && (
           <span
-            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
+            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-on-primary"
             style={{ backgroundColor: mysterySet.color }}
           >
             {t({ sk: "Dnes", en: "Today" })}

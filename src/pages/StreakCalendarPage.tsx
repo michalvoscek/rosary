@@ -38,7 +38,7 @@ function MonthCalendar({ month, days, todayKey }: MonthCalendarProps) {
   const trailing = (7 - (cells % 7)) % 7;
 
   return (
-    <div className="bg-rosary-beige-light rounded-2xl border border-stone-200 p-4 sm:p-6">
+    <div className="bg-surface rounded-2xl border border-line p-4 sm:p-6">
       <h2 className="mb-3 text-lg font-semibold">
         {t({ sk: monthNames.sk[monthIndex], en: monthNames.en[monthIndex] })}{" "}
         {year}
@@ -47,7 +47,7 @@ function MonthCalendar({ month, days, todayKey }: MonthCalendarProps) {
         {[0, 1, 2, 3, 4, 5, 6].map((day) => (
           <div
             key={day}
-            className="flex items-center justify-center h-8 text-xs font-semibold uppercase text-stone-500"
+            className="flex items-center justify-center h-8 text-xs font-semibold uppercase text-muted"
           >
             {t({
               sk: weekdayNamesMondayFirst.sk[day],
@@ -68,9 +68,9 @@ function MonthCalendar({ month, days, todayKey }: MonthCalendarProps) {
               key={dateKey}
               className={`flex items-center justify-center h-9 rounded-full text-sm ${
                 prayed
-                  ? "bg-black font-semibold text-white"
-                  : "text-stone-700"
-              } ${isToday ? "ring-2 ring-black ring-offset-1" : ""}`}
+                  ? "bg-accent font-semibold text-on-accent"
+                  : "text-body"
+              } ${isToday ? "ring-2 ring-accent ring-offset-1 ring-offset-surface" : ""}`}
               aria-label={dateKey}
             >
               {day}

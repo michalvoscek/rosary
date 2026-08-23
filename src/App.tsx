@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { LanguageProvider } from './contexts/LanguageContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { Layout } from './components/Layout';
 import { HomePage } from './pages/HomePage';
 import { PrayPage } from './pages/PrayPage';
@@ -36,11 +37,13 @@ function AnimatedRoutes() {
 function App() {
   return (
     <LanguageProvider>
-      <PageTransitionProvider>
-        <Layout>
-          <AnimatedRoutes />
-        </Layout>
-      </PageTransitionProvider>
+      <ThemeProvider>
+        <PageTransitionProvider>
+          <Layout>
+            <AnimatedRoutes />
+          </Layout>
+        </PageTransitionProvider>
+      </ThemeProvider>
     </LanguageProvider>
   );
 }

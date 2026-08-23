@@ -35,7 +35,7 @@ export function ProgressIndicator({ currentStep }: ProgressIndicatorProps) {
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between text-xs text-stone-700">
+      <div className="flex items-center justify-between text-xs text-body">
         <span className="font-medium">
           {t({ sk: stage.sk, en: stage.en })}
         </span>
@@ -52,11 +52,11 @@ export function ProgressIndicator({ currentStep }: ProgressIndicatorProps) {
           return (
             <div
               key={section.sk}
-              className="h-2 bg-stone-400 rounded-full overflow-hidden"
+              className="h-2 bg-track rounded-full overflow-hidden"
               style={{ flexGrow: sectionSize }}
             >
               <div
-                className="h-full bg-black rounded-full transition-all duration-500 ease-out"
+                className="h-full bg-accent rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${fill * 100}%` }}
               />
             </div>

@@ -1,5 +1,7 @@
 export type Language = 'sk' | 'en';
 
+export type ThemeId = 'light' | 'dark';
+
 export type MysterySet = 'joyful' | 'sorrowful' | 'glorious' | 'luminous';
 
 export interface BilingualText {
