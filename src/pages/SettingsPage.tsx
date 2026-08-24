@@ -8,7 +8,9 @@ const themeLabels: Record<ThemeId, { sk: string; en: string }> = {
 };
 
 // Swatches take their colors from the theme itself: data-theme scopes the
-// light/dark CSS variables to the swatch row (see index.css).
+// light/dark CSS variables to the preview wrapper (see index.css). The
+// button itself stays unscoped so the selection ring/offset resolve against
+// the current app theme and stay visible outside the preview.
 const swatchClasses = ["bg-app", "bg-surface", "bg-body", "bg-accent", "bg-primary"];
 
 export function SettingsPage() {
@@ -45,21 +47,26 @@ export function SettingsPage() {
               type="button"
               onClick={() => setTheme(id)}
               aria-pressed={theme === id}
-              className={`flex flex-col items-start gap-2 rounded-xl border p-3 transition-all ${
+              className={`rounded-xl transition-all ${
                 theme === id
-                  ? "border-accent ring-2 ring-accent"
-                  : "border-line hover:border-line-strong"
+                  ? "ring-2 ring-accent ring-offset-2 ring-offset-surface"
+                  : "hover:ring-2 hover:ring-line-strong hover:ring-offset-2 hover:ring-offset-surface"
               }`}
             >
-              <span data-theme={id} className="flex gap-1.5">
-                {swatchClasses.map((swatch) => (
-                  <span
-                    key={swatch}
-                    className={`h-5 w-5 rounded-full border border-line ${swatch}`}
-                  />
-                ))}
+              <span
+                data-theme={id}
+                className="flex flex-col items-start gap-2 rounded-lg border border-line bg-surface p-3 text-body"
+              >
+                <span className="flex gap-1.5">
+                  {swatchClasses.map((swatch) => (
+                    <span
+                      key={swatch}
+                      className={`h-5 w-5 rounded-full border border-line ${swatch}`}
+                    />
+                  ))}
+                </span>
+                <span className="text-sm font-medium">{t(themeLabels[id])}</span>
               </span>
-              <span className="text-sm font-medium">{t(themeLabels[id])}</span>
             </button>
           ))}
         </div>
