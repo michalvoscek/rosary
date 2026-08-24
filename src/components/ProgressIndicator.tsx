@@ -56,7 +56,7 @@ export function ProgressIndicator({ currentStep }: ProgressIndicatorProps) {
               style={{ flexGrow: sectionSize }}
             >
               <div
-                className="h-full bg-accent rounded-full transition-all duration-500 ease-out"
+                className="h-full bg-progress rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${fill * 100}%` }}
               />
             </div>

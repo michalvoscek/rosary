@@ -23,6 +23,7 @@
   --color-primary: var(--primary);
   --color-on-primary: var(--on-primary);
   --color-track: var(--track);
+  --color-progress: var(--progress);
   --color-overlay: var(--overlay);
 }
 
@@ -105,6 +106,11 @@
   inherits: true;
   initial-value: #a8a29e;
 }
+@property --progress {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #000000;
+}
 @property --overlay {
   syntax: "<color>";
   inherits: true;
@@ -130,6 +136,7 @@
   --primary: #7c3aed;
   --on-primary: #ffffff;
   --track: #a8a29e;
+  --progress: #000000;
   --overlay: rgb(0 0 0 / 0.1);
 
   /* Theme-independent mystery accents (used via inline styles) */
@@ -147,15 +154,16 @@
   --input: #292524;
   --line: #44403c;
   --line-strong: #57534e;
-  --heading: #fafaf9;
-  --body: #e7e5e4;
-  --muted: #a8a29e;
-  --faint: #78716c;
+  --heading: #e8c46a;
+  --body: #d4a843;
+  --muted: #b08d3f;
+  --faint: #8a6f33;
   --accent: #fafaf9;
   --on-accent: #1c1917;
   --primary: #7c3aed;
   --on-primary: #ffffff;
   --track: #57534e;
+  --progress: #e8c46a;
   --overlay: rgb(255 255 255 / 0.1);
 }
 
@@ -179,6 +187,7 @@
     --primary 300ms ease,
     --on-primary 300ms ease,
     --track 300ms ease,
+    --progress 300ms ease,
     --overlay 300ms ease;
 }
 
