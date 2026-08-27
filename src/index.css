@@ -94,7 +94,7 @@
 @property --primary {
   syntax: "<color>";
   inherits: true;
-  initial-value: #7c3aed;
+  initial-value: #95a791;
 }
 @property --on-primary {
   syntax: "<color>";
@@ -133,8 +133,8 @@
   --faint: #a8a29e;
   --accent: #000000;
   --on-accent: #ffffff;
-  --primary: #7c3aed;
-  --on-primary: #ffffff;
+  --primary: #95a791;
+  --on-primary: #1c1917;
   --track: #a8a29e;
   --progress: #000000;
   --overlay: rgb(0 0 0 / 0.1);
@@ -160,8 +160,8 @@
   --faint: #8a6f33;
   --accent: #fafaf9;
   --on-accent: #1c1917;
-  --primary: #7c3aed;
-  --on-primary: #ffffff;
+  --primary: #5c6959;
+  --on-primary: #d4a843;
   --track: #57534e;
   --progress: #e8c46a;
   --overlay: rgb(255 255 255 / 0.1);
