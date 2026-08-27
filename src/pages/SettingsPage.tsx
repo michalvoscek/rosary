@@ -1,5 +1,7 @@
 import { useLanguage } from "../contexts/LanguageContext";
 import { useTheme } from "../contexts/ThemeContext";
+import { useInstallPrompt } from "../hooks/useInstallPrompt";
+import { Check, Download } from "lucide-react";
 import type { Language, ThemeId } from "../types";
 
 const themeLabels: Record<ThemeId, { sk: string; en: string }> = {
@@ -16,6 +18,7 @@ const swatchClasses = ["bg-app", "bg-surface", "bg-body", "bg-accent", "bg-prima
 export function SettingsPage() {
   const { lang, setLang, t } = useLanguage();
   const { theme, setTheme } = useTheme();
+  const { canInstall, install, isStandalone, isIOS } = useInstallPrompt();
 
   return (
     <div className="space-y-6">
@@ -71,6 +74,56 @@ export function SettingsPage() {
           ))}
         </div>
       </section>
+
+      {(canInstall || isIOS || isStandalone) && (
+        <section className="bg-surface rounded-2xl border border-line p-4 sm:p-6">
+          <h2 className="mb-3 text-lg font-semibold">
+            {t({ sk: "Inštalácia", en: "Install" })}
+          </h2>
+          {canInstall && (
+            <button
+              type="button"
+              onClick={install}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-on-primary text-sm font-medium hover:bg-primary/90 transition-colors"
+            >
+              <Download size={18} />
+              {t({ sk: "Inštalovať aplikáciu", en: "Install app" })}
+            </button>
+          )}
+          {isIOS && (
+            <ol className="space-y-2 text-sm text-body list-decimal list-inside">
+              <li>
+                {t({
+                  sk: "Klepni na tlačidlo Zdieľať v Safari",
+                  en: "Tap the Share button in Safari",
+                })}
+              </li>
+              <li>
+                {t({
+                  sk: 'Vyber "Pridať na plochu"',
+                  en: 'Choose "Add to Home Screen"',
+                })}
+              </li>
+              <li>
+                {t({
+                  sk: "Otvoriť aplikáciu z domovskej obrazovky",
+                  en: "Open the app from your home screen",
+                })}
+              </li>
+            </ol>
+          )}
+          {isStandalone && (
+            <button
+              type="button"
+              disabled
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/40 text-on-primary/70 text-sm font-medium cursor-default"
+            >
+              <Check size={18} />
+              {t({ sk: "Nainštalované", en: "Installed" })}
+            </button>
+          )}
+        </section>
+      )}
     </div>
   );
 }
