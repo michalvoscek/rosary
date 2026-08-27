@@ -5,20 +5,37 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
 }
 
+// The browser dispatches beforeinstallprompt once per page load, shortly
+// after load finishes. Components mounting later (e.g. SPA navigation onto
+// /settings) would never see it, so capture it at module scope instead of
+// inside the hook's effect and let late mounts pick up the stashed event.
+let capturedPromptEvent: BeforeInstallPromptEvent | null = null;
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  capturedPromptEvent = e as BeforeInstallPromptEvent;
+});
+
+window.addEventListener("appinstalled", () => {
+  capturedPromptEvent = null;
+});
+
 export function useInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] =
-    useState<BeforeInstallPromptEvent | null>(null);
+    useState<BeforeInstallPromptEvent | null>(() => capturedPromptEvent);
   const [isStandalone, setIsStandalone] = useState(() => {
     const mq = window.matchMedia("(display-mode: standalone)");
     return mq.matches || "standalone" in navigator;
   });
 
   useEffect(() => {
+    // preventDefault is already handled by the module-scope listener above;
+    // here we only mirror the stashed event into component state.
     const onBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
     };
     const onAppInstalled = () => {
+      capturedPromptEvent = null;
       setDeferredPrompt(null);
       setIsStandalone(true);
     };
@@ -42,6 +59,9 @@ export function useInstallPrompt() {
     if (!deferredPrompt) return;
     await deferredPrompt.prompt();
     await deferredPrompt.userChoice;
+    // Prompting consumes the event; clear the stash so a later remount of
+    // the settings page can't resurrect a spent prompt.
+    capturedPromptEvent = null;
     setDeferredPrompt(null);
   }, [deferredPrompt]);
 
