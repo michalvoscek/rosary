@@ -99,27 +99,30 @@ export function StreakCalendarPage() {
   };
 
   return (
-    <SwipeStack
-      prev={
-        <MonthCalendar
-          month={addMonths(month, -1)}
-          days={days}
-          todayKey={todayKey}
-        />
-      }
-      current={
-        <MonthCalendar month={month} days={days} todayKey={todayKey} />
-      }
-      next={
-        <MonthCalendar
-          month={addMonths(month, 1)}
-          days={days}
-          todayKey={todayKey}
-        />
-      }
-      onSwitch={handleSwitch}
-      canGoDown={() => true}
-      syncKey={monthKey(month)}
-    />
+    <div className="-my-6 sm:-my-8 flex flex-1 min-h-0 flex-col overflow-hidden">
+      <SwipeStack
+        className="pt-6 sm:pt-8"
+        prev={
+          <MonthCalendar
+            month={addMonths(month, -1)}
+            days={days}
+            todayKey={todayKey}
+          />
+        }
+        current={
+          <MonthCalendar month={month} days={days} todayKey={todayKey} />
+        }
+        next={
+          <MonthCalendar
+            month={addMonths(month, 1)}
+            days={days}
+            todayKey={todayKey}
+          />
+        }
+        onSwitch={handleSwitch}
+        canGoDown={() => true}
+        syncKey={monthKey(month)}
+      />
+    </div>
   );
 }

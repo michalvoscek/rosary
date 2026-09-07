@@ -154,60 +154,63 @@ export function PrayPage() {
   }
 
   return (
-    <SwipeStack
-      header={
-        <div className="pb-6">
-          <ProgressIndicator currentStep={currentStep} />
-        </div>
-      }
-      prev={
-        prevStep !== null ? (
-          <CardContent
-            step={prevStep}
-            mysterySetId={validMysterySetId}
-            mysterySet={mysterySet}
-          />
-        ) : undefined
-      }
-      current={
-        <CardContent
-          step={effectiveStep}
-          mysterySetId={validMysterySetId}
-          mysterySet={mysterySet}
-        />
-      }
-      next={
-        nextStep !== null ? (
-          <CardContent
-            step={nextStep}
-            mysterySetId={validMysterySetId}
-            mysterySet={mysterySet}
-          />
-        ) : undefined
-      }
-      overlay={
-        showHint && !isFinishedCard ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none animate-fade-in">
-            <div className="flex flex-col items-center gap-2 text-faint">
-              <ChevronUp size={24} className="animate-bounce" />
-              <span className="text-sm font-medium">
-                {t({
-                  sk: "Potiahnite nahor alebo dole",
-                  en: "Swipe up or down",
-                })}
-              </span>
-              <ChevronDown
-                size={24}
-                className="animate-bounce"
-                style={{ animationDelay: "0.15s" }}
-              />
-            </div>
+    <div className="-my-6 sm:-my-8 flex flex-1 min-h-0 flex-col overflow-hidden">
+      <SwipeStack
+        className="pt-6 sm:pt-8"
+        header={
+          <div className="pb-6">
+            <ProgressIndicator currentStep={currentStep} />
           </div>
-        ) : undefined
-      }
-      onSwitch={handleSwitch}
-      canGoDown={() => effectiveStep === "finished" || currentStep > 0}
-      syncKey={effectiveStep}
-    />
+        }
+        prev={
+          prevStep !== null ? (
+            <CardContent
+              step={prevStep}
+              mysterySetId={validMysterySetId}
+              mysterySet={mysterySet}
+            />
+          ) : undefined
+        }
+        current={
+          <CardContent
+            step={effectiveStep}
+            mysterySetId={validMysterySetId}
+            mysterySet={mysterySet}
+          />
+        }
+        next={
+          nextStep !== null ? (
+            <CardContent
+              step={nextStep}
+              mysterySetId={validMysterySetId}
+              mysterySet={mysterySet}
+            />
+          ) : undefined
+        }
+        overlay={
+          showHint && !isFinishedCard ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none animate-fade-in">
+              <div className="flex flex-col items-center gap-2 text-faint">
+                <ChevronUp size={24} className="animate-bounce" />
+                <span className="text-sm font-medium">
+                  {t({
+                    sk: "Potiahnite nahor alebo dole",
+                    en: "Swipe up or down",
+                  })}
+                </span>
+                <ChevronDown
+                  size={24}
+                  className="animate-bounce"
+                  style={{ animationDelay: "0.15s" }}
+                />
+              </div>
+            </div>
+          ) : undefined
+        }
+        onSwitch={handleSwitch}
+        canGoDown={() => effectiveStep === "finished" || currentStep > 0}
+        syncKey={effectiveStep}
+      />
+    </div>
   );
 }
