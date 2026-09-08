@@ -15,8 +15,10 @@ export default defineConfig({
         short_name: "Rosary",
         description:
           "Interactive Rosary prayer app with bilingual support (Slovak/English)",
-        // Install-time colors; keep in sync with the light theme in src/index.css
-        theme_color: "#faf0e6",
+        // Single statusbar color that works in both themes: Android
+        // installed PWAs always use this static value; dynamic meta
+        // theme-color switching is unreliable.
+        theme_color: "#4a3527",
         background_color: "#eed9c4",
         display: "standalone",
         orientation: "portrait",

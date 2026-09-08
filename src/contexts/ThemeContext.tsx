@@ -27,22 +27,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useLayoutEffect(() => {
-    const root = document.documentElement;
-    root.dataset.theme = theme;
-    // Resolve the target --surface from a probe element matching the new
-    // theme. Reading it from <html> would return the transitioned value,
-    // and Chrome Android can ignore setAttribute() on an existing meta
-    // tag, so replace the tag instead.
-    const probe = document.createElement("div");
-    probe.dataset.theme = theme;
-    document.body.appendChild(probe);
-    const surface = getComputedStyle(probe).getPropertyValue("--surface").trim();
-    probe.remove();
-    document.querySelector('meta[name="theme-color"]')?.remove();
-    const meta = document.createElement("meta");
-    meta.name = "theme-color";
-    meta.content = surface;
-    document.head.appendChild(meta);
+    document.documentElement.dataset.theme = theme;
   }, [theme]);
 
   return (

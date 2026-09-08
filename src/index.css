@@ -28,9 +28,8 @@
 }
 
 /* Theme tokens are registered as animatable custom properties so the whole
- * app can crossfade in sync with the browser topbar (theme-color). Without
- * this, the app flips colors instantly while the mobile browser chrome
- * transitions over ~300ms, drawing a thin line at the boundary. */
+ * app can crossfade during a theme switch. Without this, the app flips
+ * colors instantly, which looks jarring next to the stable topbar color. */
 @property --app {
   syntax: "<color>";
   inherits: true;
