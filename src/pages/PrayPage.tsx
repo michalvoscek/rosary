@@ -27,7 +27,7 @@ function CardContent({ step, mysterySetId, mysterySet }: CardContentProps) {
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-overlay text-accent">
           <Check size={28} />
         </div>
-        <h2 className="text-2xl font-bold text-heading">
+        <h2 className="text-2xl font-bold text-body">
           {t({ sk: "Ruženec dokončený", en: "Rosary completed" })}
         </h2>
         <p className="text-lg leading-relaxed text-body whitespace-pre-wrap">
@@ -139,12 +139,12 @@ export function PrayPage() {
   if (!mysterySet) {
     return (
       <div className="text-center py-20">
-        <p className="text-muted">
+        <p className="text-body">
           {t({ sk: "Tajomstvo nenájdené", en: "Mystery not found" })}
         </p>
         <button
           onClick={() => navigate("/")}
-          className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-on-primary text-sm font-medium hover:bg-primary/90 transition-colors"
+          className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-body text-sm font-medium hover:bg-primary/90 transition-colors"
         >
           <Home size={16} />
           {t({ sk: "Späť domov", en: "Back home" })}
@@ -190,7 +190,7 @@ export function PrayPage() {
         overlay={
           showHint && !isFinishedCard ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none animate-fade-in">
-              <div className="flex flex-col items-center gap-2 text-faint">
+              <div className="flex flex-col items-center gap-2 text-body">
                 <ChevronUp size={24} className="animate-bounce" />
                 <span className="text-sm font-medium">
                   {t({

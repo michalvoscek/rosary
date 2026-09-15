@@ -84,7 +84,7 @@ export function SettingsPage() {
             <button
               type="button"
               onClick={install}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-on-primary text-sm font-medium hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-body text-sm font-medium hover:bg-primary/90 transition-colors"
             >
               <Download size={18} />
               {t({ sk: "Inštalovať aplikáciu", en: "Install app" })}
@@ -116,7 +116,7 @@ export function SettingsPage() {
             <button
               type="button"
               disabled
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/40 text-on-primary/70 text-sm font-medium cursor-default"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/40 text-body/70 text-sm font-medium cursor-default"
             >
               <Check size={18} />
               {t({ sk: "Nainštalované", en: "Installed" })}
