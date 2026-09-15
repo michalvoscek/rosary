@@ -47,7 +47,7 @@ function MonthCalendar({ month, days, todayKey }: MonthCalendarProps) {
         {[0, 1, 2, 3, 4, 5, 6].map((day) => (
           <div
             key={day}
-            className="flex items-center justify-center h-8 text-xs font-semibold uppercase text-muted"
+            className="flex items-center justify-center h-8 text-xs font-semibold uppercase text-body"
           >
             {t({
               sk: weekdayNamesMondayFirst.sk[day],

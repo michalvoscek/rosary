@@ -32,7 +32,7 @@ export function Layout({ children }: { children: ReactNode }) {
             </Link>
             <Link
               to="/settings"
-              className="flex items-center justify-center p-2 rounded-full hover:text-heading hover:bg-overlay transition-colors"
+              className="flex items-center justify-center p-2 rounded-full hover:text-body hover:bg-overlay transition-colors"
               title="Settings"
               aria-label="Settings"
             >
