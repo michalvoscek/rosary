@@ -117,7 +117,7 @@ export function PrayerDisplay({ step, mysterySetId }: PrayerDisplayProps) {
   return (
     <div className="bg-surface rounded-2xl border border-line p-6 sm:p-8 flex flex-col">
       <div className="text-center shrink-0">
-        <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-subtle text-body mb-3">
+        <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-line text-body mb-3">
           {label}
         </span>
       </div>

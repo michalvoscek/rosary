@@ -52,7 +52,7 @@ export function ProgressIndicator({ currentStep }: ProgressIndicatorProps) {
           return (
             <div
               key={section.sk}
-              className="h-2 bg-track rounded-full overflow-hidden"
+              className="h-2 bg-line-strong rounded-full overflow-hidden"
               style={{ flexGrow: sectionSize }}
             >
               <div
