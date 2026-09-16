@@ -30,7 +30,7 @@ export function SettingsPage() {
           <select
             value={lang}
             onChange={(e) => setLang(e.target.value as Language)}
-            className="w-full rounded-xl border border-line-strong bg-input px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/20"
+            className="w-full rounded-xl border border-line-strong bg-line px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/20"
             aria-label={t({ sk: "Jazyk", en: "Language" })}
           >
             <option value="sk">{t({ sk: "Slovenčina", en: "Slovak" })}</option>
