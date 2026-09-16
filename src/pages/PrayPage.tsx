@@ -24,7 +24,7 @@ function CardContent({ step, mysterySetId, mysterySet }: CardContentProps) {
   if (step === "finished") {
     return (
       <div className="bg-surface rounded-2xl border border-line p-6 sm:p-8 flex flex-col items-center justify-center gap-4 text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-overlay text-accent">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-overlay text-body">
           <Check size={28} />
         </div>
         <h2 className="text-2xl font-bold text-body">
