@@ -13,8 +13,7 @@
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
   --color-body: var(--body);
-  --color-accent: var(--accent);
-  --color-on-accent: var(--on-accent);
+  --color-on-body: var(--on-body);
   --color-primary: var(--primary);
   --color-overlay: var(--overlay);
 }
@@ -47,12 +46,7 @@
   inherits: true;
   initial-value: #1c1917;
 }
-@property --accent {
-  syntax: "<color>";
-  inherits: true;
-  initial-value: #000000;
-}
-@property --on-accent {
+@property --on-body {
   syntax: "<color>";
   inherits: true;
   initial-value: #ffffff;
@@ -72,8 +66,7 @@
   --line: #e7e5e4;
   --line-strong: #d6d3d1;
   --body: #21201f;
-  --accent: #000000;
-  --on-accent: #ffffff;
+  --on-body: #ffffff;
   --primary: #95a791;
   --overlay: rgb(0 0 0 / 0.1);
 
@@ -91,8 +84,7 @@
   --line: #44403c;
   --line-strong: #57534e;
   --body: #e8c46a;
-  --accent: #fafaf9;
-  --on-accent: #1c1917;
+  --on-body: #1c1917;
   --primary: #5c6959;
   --overlay: rgb(255 255 255 / 0.1);
 }
