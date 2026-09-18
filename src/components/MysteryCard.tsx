@@ -22,10 +22,10 @@ export function MysteryCard({
     >
       <div className="flex items-start justify-between mb-2">
         <div>
-          <h3 className="font-semibold text-lg text-heading">
+          <h3 className="font-semibold text-lg text-body">
             {t(mysterySet.title)}
           </h3>
-          <p className="text-sm text-muted">
+          <p className="text-sm text-body">
             {weekdayLabel || t(mysterySet.subtitle)}
           </p>
         </div>

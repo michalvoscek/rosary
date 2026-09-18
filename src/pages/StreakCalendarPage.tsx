@@ -47,7 +47,7 @@ function MonthCalendar({ month, days, todayKey }: MonthCalendarProps) {
         {[0, 1, 2, 3, 4, 5, 6].map((day) => (
           <div
             key={day}
-            className="flex items-center justify-center h-8 text-xs font-semibold uppercase text-muted"
+            className="flex items-center justify-center h-8 text-xs font-semibold uppercase text-body"
           >
             {t({
               sk: weekdayNamesMondayFirst.sk[day],
@@ -68,9 +68,9 @@ function MonthCalendar({ month, days, todayKey }: MonthCalendarProps) {
               key={dateKey}
               className={`flex items-center justify-center h-9 rounded-full text-sm ${
                 prayed
-                  ? "bg-accent font-semibold text-on-accent"
+                  ? "bg-body font-semibold text-on-body"
                   : "text-body"
-              } ${isToday ? "ring-2 ring-accent ring-offset-1 ring-offset-surface" : ""}`}
+              } ${isToday ? "ring-2 ring-body ring-offset-1 ring-offset-surface" : ""}`}
               aria-label={dateKey}
             >
               {day}

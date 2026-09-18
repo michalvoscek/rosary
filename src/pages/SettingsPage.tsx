@@ -13,7 +13,7 @@ const themeLabels: Record<ThemeId, { sk: string; en: string }> = {
 // light/dark CSS variables to the preview wrapper (see index.css). The
 // button itself stays unscoped so the selection ring/offset resolve against
 // the current app theme and stay visible outside the preview.
-const swatchClasses = ["bg-app", "bg-surface", "bg-body", "bg-accent", "bg-primary"];
+const swatchClasses = ["bg-app", "bg-surface", "bg-body", "bg-primary"];
 
 export function SettingsPage() {
   const { lang, setLang, t } = useLanguage();
@@ -30,7 +30,7 @@ export function SettingsPage() {
           <select
             value={lang}
             onChange={(e) => setLang(e.target.value as Language)}
-            className="w-full rounded-xl border border-line-strong bg-input px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/20"
+            className="w-full rounded-xl border border-line-strong bg-line px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-body/20"
             aria-label={t({ sk: "Jazyk", en: "Language" })}
           >
             <option value="sk">{t({ sk: "Slovenčina", en: "Slovak" })}</option>
@@ -52,7 +52,7 @@ export function SettingsPage() {
               aria-pressed={theme === id}
               className={`rounded-xl transition-all ${
                 theme === id
-                  ? "ring-2 ring-accent ring-offset-2 ring-offset-surface"
+                  ? "ring-2 ring-body ring-offset-2 ring-offset-surface"
                   : "hover:ring-2 hover:ring-line-strong hover:ring-offset-2 hover:ring-offset-surface"
               }`}
             >
@@ -84,7 +84,7 @@ export function SettingsPage() {
             <button
               type="button"
               onClick={install}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-on-primary text-sm font-medium hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-body text-sm font-medium hover:bg-primary/90 transition-colors"
             >
               <Download size={18} />
               {t({ sk: "Inštalovať aplikáciu", en: "Install app" })}
@@ -116,7 +116,7 @@ export function SettingsPage() {
             <button
               type="button"
               disabled
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/40 text-on-primary/70 text-sm font-medium cursor-default"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/40 text-body/70 text-sm font-medium cursor-default"
             >
               <Check size={18} />
               {t({ sk: "Nainštalované", en: "Installed" })}

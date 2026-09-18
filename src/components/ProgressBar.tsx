@@ -1,6 +1,6 @@
 import { useLanguage } from "../contexts/LanguageContext";
 
-interface ProgressIndicatorProps {
+interface ProgressBarProps {
   currentStep: number;
 }
 
@@ -24,7 +24,7 @@ function getStage(step: number): Stage {
   return SECTIONS.find((section) => step <= section.end) ?? SECTIONS[5];
 }
 
-export function ProgressIndicator({ currentStep }: ProgressIndicatorProps) {
+export function ProgressBar({ currentStep }: ProgressBarProps) {
   const { t } = useLanguage();
   const stage = getStage(currentStep);
   const stageSize = stage.end - stage.start + 1;
@@ -52,11 +52,11 @@ export function ProgressIndicator({ currentStep }: ProgressIndicatorProps) {
           return (
             <div
               key={section.sk}
-              className="h-2 bg-track rounded-full overflow-hidden"
+              className="h-2 bg-line-strong rounded-full overflow-hidden"
               style={{ flexGrow: sectionSize }}
             >
               <div
-                className="h-full bg-progress rounded-full transition-all duration-500 ease-out"
+                className="h-full bg-body rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${fill * 100}%` }}
               />
             </div>
