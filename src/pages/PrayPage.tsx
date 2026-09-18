@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { getMysterySet } from "../data/mysteries";
 import { PrayerDisplay } from "../components/PrayerDisplay";
-import { ProgressIndicator } from "../components/ProgressIndicator";
+import { ProgressBar } from "../components/ProgressBar";
 import { SwipeStack } from "../components/SwipeStack";
 import { usePrayerStreak } from "../hooks/usePrayerStreak";
 import { Check, Home, ChevronUp, ChevronDown } from "lucide-react";
@@ -159,7 +159,7 @@ export function PrayPage() {
         className="pt-6 sm:pt-8"
         header={
           <div className="pb-6">
-            <ProgressIndicator currentStep={currentStep} />
+            <ProgressBar currentStep={currentStep} />
           </div>
         }
         prev={
