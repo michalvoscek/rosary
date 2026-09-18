@@ -5,10 +5,9 @@ import { getMysterySet } from "../data/mysteries";
 import { PrayerDisplay } from "../components/PrayerDisplay";
 import { ProgressBar } from "../components/ProgressBar";
 import { SwipeStack } from "../components/SwipeStack";
+import { getPrayerStep, TOTAL_STEPS } from "../lib/prayerStep";
 import { usePrayerStreak } from "../hooks/usePrayerStreak";
-import { Check, Home, ChevronUp, ChevronDown } from "lucide-react";
-
-const TOTAL_STEPS = 7 + 13 * 5; // 72
+import { Home, ChevronUp, ChevronDown } from "lucide-react";
 
 type StepOrFinished = number | "finished";
 
@@ -19,23 +18,29 @@ interface CardContentProps {
 }
 
 function CardContent({ step, mysterySetId, mysterySet }: CardContentProps) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
 
   if (step === "finished") {
+    const { label, text, icon } = getPrayerStep({
+      t,
+      lang,
+      step,
+      mysterySetId,
+    });
+
     return (
       <div className="bg-surface rounded-2xl border border-line p-6 sm:p-8 flex flex-col items-center justify-center gap-4 text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-overlay text-body">
-          <Check size={28} />
-        </div>
-        <h2 className="text-2xl font-bold text-body">
-          {t({ sk: "Ruženec dokončený", en: "Rosary completed" })}
-        </h2>
-        <p className="text-lg leading-relaxed text-body whitespace-pre-wrap">
-          {t({
-            sk: "Ďakujeme za spoločnú modlitbu. Nech vás Panna Mária ochraňuje.",
-            en: "Thank you for praying with us. May the Virgin Mary protect you.",
-          })}
-        </p>
+        {icon && (
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-overlay text-body">
+            {icon}
+          </div>
+        )}
+        {label && <h2 className="text-2xl font-bold text-body">{label}</h2>}
+        {text && (
+          <p className="text-lg leading-relaxed text-body whitespace-pre-wrap">
+            {text}
+          </p>
+        )}
       </div>
     );
   }
@@ -59,7 +64,7 @@ export function PrayPage() {
     step: string;
   }>();
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
 
   const validMysterySetId = mysterySetId || "";
   const mysterySet = getMysterySet(validMysterySetId);
@@ -136,6 +141,13 @@ export function PrayPage() {
 
   const isFinishedCard = effectiveStep === "finished";
 
+  const prayerLabel = getPrayerStep({
+    t,
+    lang,
+    step: effectiveStep,
+    mysterySetId: validMysterySetId,
+  }).label;
+
   if (!mysterySet) {
     return (
       <div className="text-center py-20">
@@ -159,7 +171,7 @@ export function PrayPage() {
         className="pt-6 sm:pt-8"
         header={
           <div className="pb-6">
-            <ProgressBar currentStep={currentStep} />
+            <ProgressBar currentStep={currentStep} prayerLabel={prayerLabel} />
           </div>
         }
         prev={
