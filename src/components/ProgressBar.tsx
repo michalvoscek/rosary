@@ -2,6 +2,7 @@ import { useLanguage } from "../contexts/LanguageContext";
 
 interface ProgressBarProps {
   currentStep: number;
+  prayerLabel: string;
 }
 
 interface Stage {
@@ -24,14 +25,9 @@ function getStage(step: number): Stage {
   return SECTIONS.find((section) => step <= section.end) ?? SECTIONS[5];
 }
 
-export function ProgressBar({ currentStep }: ProgressBarProps) {
+export function ProgressBar({ currentStep, prayerLabel }: ProgressBarProps) {
   const { t } = useLanguage();
   const stage = getStage(currentStep);
-  const stageSize = stage.end - stage.start + 1;
-  const stageProgress =
-    stageSize === 1
-      ? 100
-      : Math.round(((currentStep - stage.start) / (stageSize)) * 100);
 
   return (
     <div className="space-y-2">
@@ -39,7 +35,7 @@ export function ProgressBar({ currentStep }: ProgressBarProps) {
         <span className="font-medium">
           {t({ sk: stage.sk, en: stage.en })}
         </span>
-        <span>{stageProgress}%</span>
+        {prayerLabel && <span>{prayerLabel}</span>}
       </div>
       <div className="flex gap-1">
         {SECTIONS.map((section) => {
