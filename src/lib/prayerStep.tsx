@@ -83,7 +83,10 @@ export function getPrayerStep({
       );
       text = buildHailMaryWithMeditation(baseText, lang, meditationText);
     }
-    return { label: t(prayerLabels.hailMary), text };
+    return {
+      label: `${t(prayerLabels.hailMary)} (${step - 2}/3)`,
+      text,
+    };
   }
   if (step === 6) {
     return { label: t(prayerLabels.gloryBe), text: t(prayers.gloryBe) };
