@@ -13,6 +13,7 @@
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
   --color-body: var(--body);
+  --color-body-soft: var(--body-soft);
   --color-on-body: var(--on-body);
   --color-primary: var(--primary);
   --color-overlay: var(--overlay);
@@ -46,6 +47,11 @@
   inherits: true;
   initial-value: #1c1917;
 }
+@property --body-soft {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #44403c;
+}
 @property --on-body {
   syntax: "<color>";
   inherits: true;
@@ -66,6 +72,7 @@
   --line: #e7e5e4;
   --line-strong: #a8a29e;
   --body: #21201f;
+  --body-soft: #44403c;
   --on-body: #ffffff;
   --primary: #95a791;
   --overlay: rgb(0 0 0 / 0.1);
@@ -84,6 +91,7 @@
   --line: #44403c;
   --line-strong: #57534e;
   --body: #e8c46a;
+  --body-soft: #d4b078;
   --on-body: #1c1917;
   --primary: #5c6959;
   --overlay: rgb(255 255 255 / 0.1);

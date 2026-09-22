@@ -23,7 +23,7 @@ export function PrayerDisplay({ step, mysterySetId }: PrayerDisplayProps) {
   return (
     <div className="bg-surface rounded-2xl border border-line p-6 sm:p-8 flex flex-col">
       <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar">
-        <p className="text-lg sm:text-xl leading-relaxed text-body whitespace-pre-wrap text-center">
+        <p className="text-lg sm:text-xl leading-relaxed text-body-soft whitespace-pre-wrap text-center">
           {text}
         </p>
       </div>

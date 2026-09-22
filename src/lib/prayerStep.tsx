@@ -35,7 +35,7 @@ function buildHailMaryWithMeditation(
     <>
       {parts[0]}
       {targetWord},{"\n"}
-      <strong>{meditationText}</strong>.{"\n"}
+      <strong className="text-body">{meditationText}</strong>.{"\n"}
       {parts[1]}
     </>
   );
