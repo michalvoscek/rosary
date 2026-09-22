@@ -35,9 +35,11 @@ All pages are wrapped in `Layout.tsx`:
 
 ## Theme Tokens
 All colors are defined in a single place: `src/index.css`.
-- Semantic tokens (`--app`, `--surface`, `--body`, ...) are mapped to Tailwind
-  utilities via `@theme inline` and get their values from the light (`:root`)
-  and `[data-theme="dark"]` blocks.
+- Semantic tokens (`--app`, `--surface`, `--body`, `--body-soft`, ...) are
+  mapped to Tailwind utilities via `@theme inline` and get their values from
+  the light (`:root`) and `[data-theme="dark"]` blocks.
+- Prayer body copy uses `--body-soft` (muted); inserted meditation clauses
+  stay bold in full `--body` ink.
 - `ThemeContext` switches themes by setting `data-theme` on `<html>`;
   the selection persists in localStorage (`rosary-theme`).
 - Mystery accent colors (`--mystery-*`) are theme-independent and used via
