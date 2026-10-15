@@ -1,10 +1,11 @@
 import { useLanguage } from "../contexts/LanguageContext";
 import { getMysteryForDay, weekdayNames } from "../data/mysteries";
 import { MysteryCard } from "../components/MysteryCard";
+import { useToday } from "../hooks/useToday";
 
 export function HomePage() {
   const { t } = useLanguage();
-  const today = new Date().getDay();
+  const today = useToday();
 
   return (
     <div className="space-y-8">
