@@ -84,16 +84,17 @@
   --mystery-luminous: #3b82f6;
 }
 
+/* Dark theme */
 [data-theme="dark"] {
   color-scheme: dark;
-  --app: #2b1f17;
-  --surface: #4a3527;
-  --line: #44403c;
-  --line-strong: #57534e;
-  --body: #e8c46a;
-  --body-soft: #ccac5d;
-  --on-body: #1c1917;
-  --primary: #5c6959;
+  --app: #1a120c;
+  --surface: #31261b;
+  --line: #413227;
+  --line-strong: #584738;
+  --body: #e6c78a;
+  --body-soft: #c9a96e;
+  --on-body: #1f1712;
+  --primary: #4c5944;
   --overlay: rgb(255 255 255 / 0.1);
 }
 

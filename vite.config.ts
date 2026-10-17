@@ -17,8 +17,10 @@ export default defineConfig({
           "Interactive Rosary prayer app with bilingual support (Slovak/English)",
         // Single statusbar color that works in both themes: Android
         // installed PWAs always use this static value; dynamic meta
-        // theme-color switching is unreliable.
-        theme_color: "#4a3527",
+        // theme-color switching is unreliable. Uses the dark theme
+        // surface; a dark statusbar also pairs fine with the
+        // light theme.
+        theme_color: "#31261b",
         background_color: "#eed9c4",
         display: "standalone",
         orientation: "portrait",
