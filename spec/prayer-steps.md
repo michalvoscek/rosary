@@ -2,7 +2,7 @@
 
 This is the single canonical definition of the rosary prayer flow. All components and pages refer to this structure.
 
-## Total Steps: 73
+## Total Steps: 72
 
 ```
 --- Start (steps 0–6) ---
@@ -41,8 +41,6 @@ This is the single canonical definition of the rosary prayer flow. All component
 60–69 10 × Hail Mary
 70   Glory Be
 71   Fatima Prayer
-
-72   Hail Holy Queen
 ```
 
 ## Decade Block Size
