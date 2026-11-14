@@ -81,7 +81,7 @@ export function PrayPage() {
 
   const effectiveStep: StepOrFinished = isFinishedUrl ? "finished" : currentStep;
 
-  const { recordPrayerDayIfStarted } = usePrayerStreak(
+  usePrayerStreak(
     currentStep,
     validMysterySetId,
     !!mysterySet,
@@ -98,7 +98,6 @@ export function PrayPage() {
         if (effectiveStep === "finished") {
           navigate("/");
         } else if (currentStep === TOTAL_STEPS - 1) {
-          recordPrayerDayIfStarted();
           navigate(`/pray/${validMysterySetId}/${TOTAL_STEPS}`);
         } else {
           navigate(`/pray/${validMysterySetId}/${currentStep + 1}`);
@@ -111,7 +110,7 @@ export function PrayPage() {
         }
       }
     },
-    [effectiveStep, currentStep, validMysterySetId, navigate, recordPrayerDayIfStarted],
+    [effectiveStep, currentStep, validMysterySetId, navigate],
   );
 
   // --- Hint auto-hide ---
